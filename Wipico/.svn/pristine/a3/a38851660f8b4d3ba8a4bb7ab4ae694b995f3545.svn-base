@@ -1,0 +1,222 @@
+package com.chinasvc.wipico;
+
+import java.io.File;
+import java.io.IOException;
+
+import android.content.Context;
+import android.util.Log;
+
+import com.chinasvc.wipico.bean.Device;
+import com.chinasvc.wipico.client.BroadcastAddressUtil;
+import com.chinasvc.wipico.client.Discovery;
+import com.chinasvc.wipico.client.MediaServer;
+import com.chinasvc.wipico.client.NetworkManage;
+import com.chinasvc.wipico.client.Discovery.ScanListener;
+import com.chinasvc.wipico.client.NetworkManage.NetworkManageListener;
+import com.chinasvc.wipico.file.WipicoFileClient;
+import com.chinasvc.wipico.file.WipicoFileClient.FileExceptionListener;
+
+/**
+ * Wipico客户端类，提供设备的扫描功能
+ * 
+ * @since 1.0.0
+ **/
+public class WipicoClient {
+
+	private String TAG = "WipicoClient";
+	private boolean isDebug = true;
+
+	private Discovery discovery;
+
+	private BroadcastAddressUtil mBroadcastService;
+	private String broadcastAddress;
+	private NetworkManage mNetworkManage;
+
+	private Context mContext;
+
+	private MediaServer mMediaServer;
+
+	private int DEFULT_HTTP_PORT = 8090;
+	private int mHttpPort = DEFULT_HTTP_PORT;
+
+	private WipicoFileClient mWipicoFileClient;
+
+	private ScanListener mScanListener;
+
+	/**
+	 * 构造方法
+	 * 
+	 * @param context
+	 * */
+	public WipicoClient(Context context) {
+		mContext = context;
+	}
+
+	/**
+	 * 初始化Wipico客户端
+	 * */
+	private void initialize() {
+		mBroadcastService = new BroadcastAddressUtil(mContext);
+		mNetworkManage = new NetworkManage(mContext);
+	}
+
+	/**
+	 * 启动Wipico客户端, 启动后，当有可用网络时将自动扫描设备，并返回扫描结果
+	 * 
+	 * @param useMedia
+	 *                是否需要使用多媒体功能
+	 * */
+	public void startWipico(boolean useMedia) {
+		initialize();
+		if (useMedia) {
+			startMediaServer(".");
+		}
+		mNetworkManage.setOnNetworkManageListener(new NetworkManageListener() {
+			@Override
+			public void netUnavailable() {
+				if (isDebug) {
+					Log.i(TAG, "无可用网络>>>>>");
+				}
+				if (mScanListener != null) {
+					mScanListener.isNetworkAvailable(false);
+				}
+				stopDiscovery();
+			}
+
+			@Override
+			public void netAvailable() {
+				if (isDebug) {
+					Log.i(TAG, "有可用网络>>>>>");
+				}
+				if (mScanListener != null) {
+					mScanListener.isNetworkAvailable(true);
+				}
+				startDiscovery();
+			}
+		});
+		mNetworkManage.startCheckNet();
+	}
+
+	/**
+	 * 启动Wipico客户端, 启动后，当有可用网络时将自动扫描设备，并返回扫描结果
+	 * */
+	public void stopWipico() {
+		stopDiscovery(); // 关闭扫描
+		if (mNetworkManage != null) {
+			mNetworkManage.closeCheckNet();
+		}
+		stopMediaServer();// 关闭Http
+		stopFileClient();// 关闭FTP
+	}
+
+	/**
+	 * 开始扫描设备
+	 * */
+	private void startDiscovery() {
+		if (discovery != null) {
+			stopDiscovery();
+		}
+		try {
+			broadcastAddress = mBroadcastService.getBroadcastAddress();// 获取广播地址
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		if (isDebug)
+			Log.i(TAG, "广播地址：" + broadcastAddress);
+		discovery = new Discovery(broadcastAddress);
+		discovery.setOnScanListener(mScanListener);
+		discovery.startScan();
+	}
+
+	/**
+	 * 停止扫描设备
+	 * */
+	private void stopDiscovery() {
+		if (discovery != null) {
+			discovery.closeScan();
+			discovery.setOnScanListener(null);
+			discovery = null;
+		}
+	}
+
+	/**
+	 * 启动多媒体远程服务,如果需要启用多媒体共享，需要启动；否则不需要启动
+	 * 
+	 * @param rootPath
+	 *                设备根目录 ,参考值 "."
+	 * */
+	private void startMediaServer(String rootPath) {
+		if (mMediaServer != null) {
+			mMediaServer.stop();
+			mMediaServer = null;
+		}
+		try {
+			File wwwroot = new File(rootPath).getAbsoluteFile();
+			mMediaServer = new MediaServer(mHttpPort, wwwroot);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 关闭多媒体共享服务，如果不需要多媒体共享，则可不用开启和关闭
+	 * */
+	private void stopMediaServer() {
+		if (mMediaServer != null) {
+			mMediaServer.stop();
+			mMediaServer = null;
+		}
+	}
+
+	/**
+	 * 启动文件管理服务，如果需要启用文件传输功能和Office功能，则需要开启和关闭，否则不需要开启和关闭。
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public void startFileClient(Device device) {
+		if (mWipicoFileClient != null) {
+			mWipicoFileClient.disconnect();
+			mWipicoFileClient = null;
+		}
+		mWipicoFileClient = new WipicoFileClient(device);
+		mWipicoFileClient.connect();
+	}
+
+	/**
+	 * 关闭文件管理客户端，如果需要启用文件传输功能和Office功能，则需要开启和关闭，否则不需要开启和关闭。
+	 * */
+	private void stopFileClient() {
+		if (mWipicoFileClient != null) {
+			mWipicoFileClient.disconnect();
+			mWipicoFileClient = null;
+		}
+	}
+
+	/**
+	 * 获取WipicoFileClient对象
+	 * 
+	 * @hide 暂不供第三方使用
+	 * */
+	protected WipicoFileClient getWipicoFileClient() {
+		return mWipicoFileClient;
+	}
+
+	/**
+	 * 设置文件管理服务连接异常监听器
+	 * 
+	 * @param fileExceptionListener
+	 *                连接状态监听器
+	 * */
+	public void setFileExceptionListener(FileExceptionListener fileExceptionListener) {
+		mWipicoFileClient.setFileExceptionListener(fileExceptionListener);
+	}
+
+	/**
+	 * 设置扫描设备监听接口
+	 * */
+	public void setOnScanListener(ScanListener scanListener) {
+		mScanListener = scanListener;
+	}
+
+}

@@ -1,0 +1,152 @@
+package com.chinasvc.wipico.client;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.InetAddress;
+
+import android.content.Context;
+import android.net.DhcpInfo;
+import android.net.wifi.WifiManager;
+
+/**
+ * 扫描设备广播工具类
+ * 
+ * @since 1.0.0
+ * */
+public class BroadcastAddressUtil {
+
+	private final static String filePath = "/proc/net/wireless";
+	private Context mContext;
+
+	public BroadcastAddressUtil(Context context) {
+		mContext = context;
+	}
+
+	protected static String getApBroadcastIp() {
+		File file = new File(filePath);
+		try {
+			FileInputStream inStream = new FileInputStream(file);
+			BufferedReader in = new BufferedReader(new InputStreamReader(inStream));
+			String line = null;
+			String tmp = null;
+			while ((line = in.readLine()) != null) {
+				if (line.contains(":")) {
+					tmp = line.substring(0, line.indexOf(":"));
+					if (tmp.contains(".")) {
+						return tmp;
+					}
+				}
+			}
+			in.close();
+			inStream.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	protected static String execCommand(String command, String dev) {
+		try {
+			Runtime runtime = Runtime.getRuntime();
+			Process proc;
+			proc = runtime.exec(command);
+			try {
+				if (proc.waitFor() != 0) {
+					System.err.println("exit value = " + proc.exitValue());
+				}
+				BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+				String line = null;
+				String tmp = null;
+				while ((line = in.readLine()) != null) {
+					if ((dev != null && line.contains(dev))) {
+						tmp = line.substring(0, line.indexOf("/"));
+						tmp = tmp.substring(0, tmp.lastIndexOf(".")) + ".255";
+						return tmp;
+					}
+				}
+			} catch (InterruptedException e) {
+				System.err.println(e);
+			}
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		return null;
+	}
+
+	protected static String execCommandLocalIp(String command, String dev) {
+		try {
+			Runtime runtime = Runtime.getRuntime();
+			Process proc;
+			proc = runtime.exec(command);
+			try {
+				if (proc.waitFor() != 0) {
+					System.err.println("exit value = " + proc.exitValue());
+				}
+				BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+				String line = null;
+				String tmp = null;
+				while ((line = in.readLine()) != null) {
+					if ((dev != null && line.contains(dev))) {
+						tmp = line.substring(line.indexOf("src") + 4);
+						tmp = tmp.trim();
+						return tmp;
+					}
+				}
+			} catch (InterruptedException e) {
+				System.err.println(e);
+			}
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		return null;
+	}
+
+	/**
+	 * 获取广播地址
+	 * */
+	public String getBroadcastAddress() throws IOException {
+		WifiManager myWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+		if (!myWifiManager.isWifiEnabled()) {
+			String tmp = getApBroadcastIp();
+			if (tmp == null) {
+				tmp = "wlan0";
+			}
+			return execCommand("ip route", tmp);
+		}
+		// myWifiManager.
+		DhcpInfo myDhcpInfo = myWifiManager.getDhcpInfo();
+		if (myDhcpInfo == null) {
+			return null;
+		}
+		int broadcast = (myDhcpInfo.ipAddress & myDhcpInfo.netmask) | ~myDhcpInfo.netmask;
+		byte[] quads = new byte[4];
+
+		for (int k = 0; k < 4; k++) {
+			quads[k] = (byte) ((broadcast >> k * 8) & 0xFF);
+		}
+		return InetAddress.getByAddress(quads).getHostAddress();
+	}
+
+	public String getLocalIp() throws IOException {
+		WifiManager myWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+		if (!myWifiManager.isWifiEnabled()) {
+			return execCommandLocalIp("ip route", getApBroadcastIp());
+		}
+		// myWifiManager.
+		DhcpInfo myDhcpInfo = myWifiManager.getDhcpInfo();
+		if (myDhcpInfo == null) {
+			return null;
+		}
+		int broadcast = myDhcpInfo.ipAddress;
+		byte[] quads = new byte[4];
+		for (int k = 0; k < 4; k++) {
+			quads[k] = (byte) ((broadcast >> k * 8) & 0xFF);
+		}
+		return InetAddress.getByAddress(quads).getHostAddress();
+	}
+
+}

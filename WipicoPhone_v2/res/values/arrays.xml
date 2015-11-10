@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="game_array">
+        <item>Fruit Ninja,com.halfbrick.fruitninja</item>
+        <item>Race,com.polarbit.rthunderlite</item>
+        <item>Mote,com.droidhen.game.racingmoto</item>
+        <item>Ultimate Racing,com.sxiaoao.car3d</item>
+    </string-array>
+
+</resources>

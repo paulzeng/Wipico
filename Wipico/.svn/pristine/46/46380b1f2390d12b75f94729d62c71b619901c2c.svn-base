@@ -1,0 +1,108 @@
+package com.chinasvc.wipico.client;
+
+import com.chinasvc.wipico.bean.Device;
+import com.chinasvc.wipico.type.Audio;
+import com.chinasvc.wipico.util.WipicoConstant;
+
+/**
+ * 音频操作请求类
+ * 
+ * @since 1.0.0
+ * */
+public class AudioHelper {
+
+	/**
+	 * 打开指定路径的音乐
+	 * 
+	 * @param path
+	 *                路径名称
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public static void openAudio(String path, Device device) {
+		ActionSender.sendMediaOperate(WipicoConstant.SERVER_CMD_AUDIO, Audio.SERVER_CMD_MUSIC_ITME_OPEN, path, device.getDeviceIp());
+	}
+
+	/**
+	 * 设置进度
+	 * 
+	 * @param progress
+	 *                进度值ms
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public static void setSeek(int progress, Device device) {
+		ActionSender.sendMediaOperate(WipicoConstant.SERVER_CMD_AUDIO, Audio.SERVER_CMD_MUSIC_ITME_SEEKBAR, progress, device.getDeviceIp());
+	}
+
+	/**
+	 * 退出音乐播放器
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public static void stop(Device device) {
+		ActionSender.sendMediaOperate(WipicoConstant.SERVER_CMD_AUDIO, Audio.SERVER_CMD_MUSIC_ITME_STOP, 0, device.getDeviceIp());
+	}
+
+	/**
+	 * 暂停音乐播放器
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public static void pause(Device device) {
+		ActionSender.sendMediaOperate(WipicoConstant.SERVER_CMD_AUDIO, Audio.SERVER_CMD_MUSIC_ITME_PAUSE, 0, device.getDeviceIp());
+	}
+
+	/**
+	 * 播放音乐
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public static void play(Device device) {
+		ActionSender.sendMediaOperate(WipicoConstant.SERVER_CMD_AUDIO, Audio.SERVER_CMD_MUSIC_ITME_PLAY, 0, device.getDeviceIp());
+	}
+
+	/**
+	 * 设置静音
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public static void mute(Device device) {
+		ActionSender.sendMediaOperate(WipicoConstant.SERVER_CMD_AUDIO, Audio.SERVER_CMD_MUSIC_ITME_MUTE, 0, device.getDeviceIp());
+	}
+
+	/**
+	 * 设置非静音
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public static void disMute(Device device) {
+		ActionSender.sendMediaOperate(WipicoConstant.SERVER_CMD_AUDIO, Audio.SERVER_CMD_MUSIC_ITME_VOICE, 0, device.getDeviceIp());
+	}
+
+	/**
+	 * 增加音量
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public static void addVolume(Device device) {
+		ActionSender.sendMediaOperate(WipicoConstant.SERVER_CMD_AUDIO, Audio.SERVER_CMD_MUSIC_ITME_VOICE_ADD, 0, device.getDeviceIp());
+	}
+
+	/**
+	 * 减少音量
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public static void decreaseVolume(Device device) {
+		ActionSender.sendMediaOperate(WipicoConstant.SERVER_CMD_AUDIO, Audio.SERVER_CMD_MUSIC_ITME_VOICE_DESC, 0, device.getDeviceIp());
+	}
+
+}

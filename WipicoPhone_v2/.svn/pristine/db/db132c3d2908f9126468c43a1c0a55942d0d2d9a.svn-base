@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Wipico</string>
+
+    <!-- Nav -->
+    <string name="nav_media">Video</string>
+    <string name="nav_image">Image</string>
+    <string name="nav_office">Business</string>
+    <string name="nav_app">Application</string>
+    <string name="nav_control">Control</string>
+
+    <!-- Activity Title -->
+    <string name="actionbar_title_mouse">Mouse</string>
+    <string name="actionbar_title_touch">Touchpad</string>
+    <string name="actionbar_title_control">Control</string>
+    <string name="actionbar_title_keyboard">Keyboard</string>
+    <string name="actionbar_title_history">History</string>
+    <string name="actionbar_title_settings">Setting</string>
+    <string name="actionbar_title_my_phone">Phone</string>
+    <string name="actionbar_title_my_device">Projection</string>
+    <string name="actionbar_title_audio">Music</string>
+    <string name="actionbar_title_video">Movie</string>
+    <string name="actionbar_title_gallery">Gallery</string>
+    <string name="actionbar_title_camera">Photo</string>
+    <string name="actionbar_title_application">Application</string>
+    <string name="actionbar_title_office_control">Office Controller</string>
+    <string name="actionbar_title_about">About</string>
+    <string name="actionbar_title_video_control">Video Controller</string>
+    <string name="actionbar_title_audio_control">Music Player</string>
+    <string name="actionbar_title_image_control">Photo Controller</string>
+    <string name="actionbar_title_image_control_default">My Pictures</string>
+    <string name="actionbar_title_video_control_default">My Video</string>
+    <string name="actionbar_title_audio_control_default">My Music</string>
+    <!-- Dialog -->
+    <string name="dialog_title_connect">Choice Device</string>
+    <string name="dialog_title_verification">Enter the verification code</string>
+    <string name="dialog_title_note">Notice</string>
+    <string name="dialog_title_property">Attribute</string>
+    <string name="dialog_msg_clear_history">Empty the history records?</string>
+    <string name="dialog_msg_disconnect">Disconnect </string>
+    <string name="dialog_msg_receive">Reception:</string>
+    <string name="dialog_msg_name">Name: </string>
+    <string name="dialog_msg_size">Size: </string>
+    <string name="dialog_msg_position">Location: </string>
+    <string name="dialog_msg_send">Send: </string>
+    <string name="dialog_msg_time">Time: </string>
+    <string name="dialog_msg_verification_error">Verification code error</string>
+
+    <!-- Button -->
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_share">Share</string>
+    <string name="btn_share_phone">Share to phone</string>
+    <string name="btn_confirm">Confirm</string>
+    <string name="btn_again">Send again</string>
+
+    <!-- Audio -->
+    <string name="audio_msg_no_prev">No previous audio</string>
+    <string name="audio_msg_no_next">No next audio</string>
+    <!--  -->
+    <string name="history_receive_from">Received from</string>
+    <string name="history_send_to">Sent to</string>
+    <string name="history_waiting_to_receive_files">Waiting to receive files</string>
+    <string name="history_waiting_to_send_the_file">Waiting to send the file</string>
+    <string name="history_receive_fail">Accept failure</string>
+    <string name="history_send_fail">Send failure</string>
+
+    <!-- Video -->
+    <string name="video_size">Size: </string>
+    <string name="video_duration">Time:</string>
+
+    <!-- Office -->
+    <string name="office_summary">Local Office files (drop-down refresh)</string>
+    <string name="office_control_prev">Previous </string>
+    <string name="office_control_next">Next </string>
+
+    <!--  -->
+    <string name="pop_local_play">Local play</string>
+    <string name="pop_remote_play">Push play</string>
+    <string name="pop_share">Share</string>
+    <string name="pop_delete">Delete</string>
+    <string name="pop_cancel">Cancel</string>
+    <string name="pop_property">Attribute</string>
+    <string name="pop_remote">Projector</string>
+    <string name="pop_play">Play</string>
+    <string name="pop_multi">Multi-select</string>
+
+    <!-- Keyboard -->
+    <string name="keyboard_submit">Submit</string>
+    <string name="keyboard_clear">Clear</string>
+
+    <!-- Message -->
+    <string name="msg_no_device">Not connected devices</string>
+    <string name="msg_no_history">No historical record</string>
+    <string name="msg_no_this_file">File does not exist </string>
+    <string name="msg_no_share">Not found user</string>
+    <string name="msg_no_ftp">Please turn on the wireless projector</string>
+    <string name="msg_no_sdcard">No storage disk</string>
+    <string name="msg_no_music">No music files</string>
+    <string name="msg_no_image">No image files</string>
+    <string name="msg_no_video">No video files</string>
+    <string name="msg_no_scan_device">Not found device</string>
+    <string name="msg_no_net">There is no available network</string>
+    <string name="msg_exit">Then quit once</string>
+    <string name="msg_data_error">Abnormal data</string>
+    <string name="msg_insufficient_storage_space_in">Insufficient storage space in</string>
+    <string name="msg_scanning_video">Scanning for video files</string>
+
+    <!--  -->
+    <string name="ab_office">Offcie</string>
+    <string name="ab_file">File management</string>
+    <string name="nav_uplaod">Upload</string>
+    <string name="nav_download">Download</string>
+    <string name="nav_ok">Complete</string>
+    <string name="nav_cancel">Cancel</string>
+    <string name="text_root_path">Root</string>
+    <string name="text_sdcard">Local Disk</string>
+    <string name="text_tf">TF card</string>
+    <string name="text_U">U disk</string>
+    <string name="text_local_office">Local Office files (drop-down refresh)</string>
+    <string name="msg_file_select_fold">"Please select a directory"</string>
+    <string name="msg_no_tf_file">"No TF card"</string>
+    <string name="msg_no_sd_file">No local storage</string>
+    <string name="msg_no_u_file">"No U disk"</string>
+    <string name="msg_no_office_local">No files, please refresh...</string>
+    <string name="msg_no_file">No files</string>
+    <string name="msg_no_ftp">Please open the wireless projection</string>
+    <string name="no_office_file">File does not exist, please refresh...</string>
+    <string name="msg_no_device_user">There is no available equipment</string>
+
+    <!-- Office -->
+    <string name="file_sdcard_name">Projection - Storage</string>
+    <string name="file_tf_name">Projection - TF card</string>
+    <string name="file_usb_name">Projection - U disk</string>
+
+    <!-- application -->
+    <string name="application_summary_video_online">Online video</string>
+    <string name="application_summary_game">Game</string>
+    <string name="application_video_youku">Youku</string>
+    <string name="application_video_sohu">Sohu</string>
+    <string name="application_video_qiyi">奇艺</string>
+    <string name="application_video_tx">腾讯视频</string>
+    <string name="application_video_pptv">PPTV</string>
+    <string name="application_video_pps">PPS</string>
+    <string name="application_video_letv">Letv</string>
+    <string name="application_item_start">Start</string>
+    <string name="application_item_download">Download</string>
+
+    <!-- Setting -->
+    <string name="setting_summary_device">Connection</string>
+    <string name="setting_summary_function">Sound and vibration</string>
+    <string name="setting_summary_other">Other</string>
+    <string name="setting_item_connect">Connected devices</string>
+    <string name="setting_item_disconnect">Disconnect</string>
+    <string name="setting_item_wlan">WLAN</string>
+    <string name="setting_item_device_wlan">Set the projection Wi-Fi</string>
+    <string name="setting_item_voice">Sounds</string>
+    <string name="setting_item_vibration">Vibration</string>
+    <string name="setting_item_help">Help</string>
+    <string name="setting_item_about">About</string>
+
+    <!-- About -->
+    <string name="setting_about_bottom">"深圳展景世纪科技有限公司\nCopyright © 2013 chinasvc.com All Rights Reserved. "</string>
+    <string name="setting_about_version_type">Android</string>
+    <string name="setting_about_code">扫描二维码，您的朋友也可下载Wipico客户端</string>
+    <string name="setting_about_version">Version</string>
+    <string name="setting_about_company_web_laber">"展景世纪："</string>
+    <string name="setting_about_company_web">"http://www.chinasvc.com/"</string>
+
+    <!-- Just use standard Pull Down String when pulling up. These can be set for languages which require it -->
+    <string name="pull_to_refresh_from_bottom_pull_label">@string/pull_to_refresh_pull_label</string>
+    <string name="pull_to_refresh_from_bottom_release_label">@string/pull_to_refresh_release_label</string>
+    <string name="pull_to_refresh_from_bottom_refreshing_label">@string/pull_to_refresh_refreshing_label</string>
+    <string name="pull_to_refresh_pull_label">Pull to refresh...</string>
+    <string name="pull_to_refresh_release_label">Release to refresh...</string>
+    <string name="pull_to_refresh_refreshing_label">Loading...</string>
+
+</resources>

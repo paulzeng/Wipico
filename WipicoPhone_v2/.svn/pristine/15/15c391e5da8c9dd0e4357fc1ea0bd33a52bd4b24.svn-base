@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="gridview_column_3_width">133.3dip</dimen>
+    <dimen name="gridview_column_3_height">183.0dip</dimen>
+    <dimen name="gridview_column_4_width">100.0dip</dimen>
+
+</resources>

@@ -1,0 +1,30 @@
+package com.chinasvc.wipico.bean;
+
+import java.io.File;
+import org.apache.commons.net.ftp.FTPFile;
+
+public class FTPFile2FileInfo {
+
+	public FTPFile2FileInfo() {
+	}
+
+	public static FileInfo ftpFile2fileInfo(FTPFile ftpFile, String remotePath, String name) {
+		FileInfo fileInfo = new FileInfo();
+		String fileName = ftpFile.getName();
+		if (ftpFile.getType() == 1) {
+			fileInfo.setDirectory(true);
+		} else {
+			fileInfo.setDirectory(false);
+		}
+		fileInfo.setName(fileName);
+		fileInfo.setSize(ftpFile.getSize());
+		if (remotePath.equals("/")) {
+			fileInfo.setPath(remotePath + name);
+		} else {
+			fileInfo.setPath(remotePath + File.separator + fileName);
+		}
+		fileInfo.setCanRead(true);
+		return fileInfo;
+	}
+
+}

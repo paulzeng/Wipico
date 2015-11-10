@@ -1,0 +1,358 @@
+package com.chinasvc.wipico;
+
+import java.io.File;
+import java.io.IOException;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Parcelable;
+import android.util.Log;
+
+import com.chinasvc.wipico.bean.Device;
+import com.chinasvc.wipico.client.BroadcastAddressUtil;
+import com.chinasvc.wipico.client.DeviceStatus;
+import com.chinasvc.wipico.client.DeviceType;
+import com.chinasvc.wipico.client.Discovery;
+import com.chinasvc.wipico.client.MediaServer;
+import com.chinasvc.wipico.client.NetworkManage;
+import com.chinasvc.wipico.client.NetworkManage.NetworkManageListener;
+import com.chinasvc.wipico.client.ScanListener;
+import com.chinasvc.wipico.file.WipicoFileClient;
+import com.chinasvc.wipico.file.WipicoFileClient.FileExceptionListener;
+import com.chinasvc.wipico.util.DeviceUtil;
+import com.chinasvc.wipico.util.WifiAdmin;
+import com.chinasvc.wipico.util.WipicoConstant;
+
+/**
+ * Wipico客户端类，提供设备的扫描功能
+ * 
+ * @since 1.0.0
+ **/
+public class WipicoClient {
+
+	private String TAG = "WipicoClient";
+	private boolean isDebug = false;
+
+	private Discovery discovery;
+
+	private BroadcastAddressUtil mBroadcastService;
+	private String broadcastAddress;
+	private NetworkManage mNetworkManage;
+
+	private Context mContext;
+
+	private MediaServer mMediaServer;
+
+	private WipicoFileClient mWipicoFileClient;
+
+	private ScanListener mScanListener;
+
+	private int VERSION_1 = 1;
+	private int VERSION_2 = 2;
+	private int wipico_version = VERSION_1;
+
+	/**
+	 * 构造方法
+	 * 
+	 * @param context
+	 * */
+	public WipicoClient(Context context) {
+		mContext = context;
+	}
+
+	/**
+	 * 初始化Wipico客户端
+	 * */
+	private void initialize() {
+		mBroadcastService = new BroadcastAddressUtil(mContext);
+		mNetworkManage = new NetworkManage(mContext);
+	}
+
+	/**
+	 * 启动Wipico客户端, 启动后，当有可用网络时将自动扫描设备，并返回扫描结果
+	 * 
+	 * @param useMedia
+	 *                是否需要使用多媒体功能
+	 * */
+	public void startWipico(boolean useMedia, int version) {
+		initialize();
+		this.wipico_version = version;
+		if (useMedia) {
+			startMediaServer(".");
+		}
+		mNetworkManage.setOnNetworkManageListener(new NetworkManageListener() {
+			@Override
+			public void netUnavailable() {
+				if (mScanListener != null) {
+					mScanListener.isNetworkAvailable(false);
+				}
+				stopDiscovery();
+			}
+
+			@Override
+			public void netAvailable() {
+				if (mScanListener != null) {
+					mScanListener.isNetworkAvailable(true);
+				}
+				String ssid = DeviceUtil.ssidCorrect(WifiAdmin.getInstance(mContext).getConnectionInfo().getSSID());
+				startDiscovery();
+				if (DeviceUtil.isMatchSSID(ssid)) {
+					// 如果是，则直接进入扫描
+					if (mScanListener != null) {
+						mScanListener.deviceType(DeviceType.DEVICE_COMMON);
+					}
+				} else {
+					// 如果不是，则获取SSID为“-xxxxx”的全部Wifi
+					if (mScanListener != null) {
+						mScanListener.deviceType(DeviceType.DEVICE_WIFI);
+					}
+				}
+			}
+		});
+		mNetworkManage.startCheckNet();
+	}
+
+	/**
+	 * 启动Wipico客户端, 启动后，当有可用网络时将自动扫描设备，并返回扫描结果
+	 * */
+	public void stopWipico() {
+		stopDiscovery(); // 关闭扫描
+		if (mNetworkManage != null) {
+			mNetworkManage.closeCheckNet();
+		}
+		stopMediaServer();// 关闭Http
+		stopFileClient();// 关闭FTP
+	}
+
+	public void connectSSID(String ssid, String capabilities, String password) {
+		this.ssid = ssid;
+		this.capabilities = capabilities;
+		this.password = password;
+		mHandler.sendEmptyMessage(CONNECT_WIFI);
+
+	}
+
+	/**
+	 * 开始扫描设备
+	 * */
+	private void startDiscovery() {
+		registerBroadcast();
+		if (discovery != null) {
+			stopDiscovery();
+		}
+		try {
+			broadcastAddress = mBroadcastService.getBroadcastAddress();// 获取广播地址
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		discovery = new Discovery(broadcastAddress, mContext, this);
+		discovery.setOnScanListener(mScanListener);
+		discovery.startScan();
+	}
+
+	/**
+	 * 停止扫描设备
+	 * */
+	private void stopDiscovery() {
+		unregisterBroadcast();
+		if (discovery != null) {
+			discovery.closeScan();
+			discovery.setOnScanListener(null);
+			discovery = null;
+		}
+	}
+
+	/**
+	 * 启动多媒体远程服务,如果需要启用多媒体共享，需要启动；否则不需要启动
+	 * 
+	 * @param rootPath
+	 *                设备根目录 ,参考值 "."
+	 * */
+	private void startMediaServer(String rootPath) {
+		if (mMediaServer != null) {
+			mMediaServer.stop();
+			mMediaServer = null;
+		}
+		try {
+			File wwwroot = new File(rootPath).getAbsoluteFile();
+			mMediaServer = new MediaServer(WipicoConstant.HTTP_PORT, wwwroot);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 关闭多媒体共享服务，如果不需要多媒体共享，则可不用开启和关闭
+	 * */
+	private void stopMediaServer() {
+		if (mMediaServer != null) {
+			mMediaServer.stop();
+			mMediaServer = null;
+		}
+	}
+
+	/**
+	 * 启动文件管理服务，如果需要启用文件传输功能和Office功能，则需要开启和关闭，否则不需要开启和关闭。
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public void startFileClient(Device device) {
+		if (mWipicoFileClient != null) {
+			mWipicoFileClient.disconnect();
+			mWipicoFileClient = null;
+		}
+		mWipicoFileClient = new WipicoFileClient(device);
+		mWipicoFileClient.connect();
+	}
+
+	/**
+	 * 关闭文件管理客户端，如果需要启用文件传输功能和Office功能，则需要开启和关闭，否则不需要开启和关闭。
+	 * */
+	private void stopFileClient() {
+		if (mWipicoFileClient != null) {
+			mWipicoFileClient.disconnect();
+			mWipicoFileClient = null;
+		}
+	}
+
+	private Device mDevice;
+
+	public void setDevice(Device device) {
+		mDevice = device;
+		if (mScanListener != null) {
+			mScanListener.deviceStatus(DeviceStatus.STATUS_CONNECTED);
+		}
+	}
+
+	public Device getDevice() {
+		return mDevice;
+	}
+
+	/**
+	 * 获取WipicoFileClient对象
+	 * 
+	 * @hide 暂不供第三方使用
+	 * */
+	protected WipicoFileClient getWipicoFileClient() {
+		return mWipicoFileClient;
+	}
+
+	/**
+	 * 设置文件管理服务连接异常监听器
+	 * 
+	 * @param fileExceptionListener
+	 *                连接状态监听器
+	 * */
+	public void setFileExceptionListener(FileExceptionListener fileExceptionListener) {
+		mWipicoFileClient.setFileExceptionListener(fileExceptionListener);
+	}
+
+	/**
+	 * 设置扫描设备监听接口
+	 * */
+	public void setOnScanListener(ScanListener scanListener) {
+		mScanListener = scanListener;
+	}
+
+	private String ssid;
+	private String password;
+	private String capabilities;
+
+	private final int CONNECT_WIFI = 0;
+
+	private Handler mHandler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			// TODO Auto-generated method stub
+			switch (msg.what) {
+			case CONNECT_WIFI:
+				if (WifiAdmin.getInstance(mContext).isWifiEnable()) {
+					if (password == null || "".equals(password)) {
+						WifiConfiguration wifiConfiguration = WifiAdmin.getInstance(mContext).createWifiConfiguration(ssid, password, 1, "wifi");
+						boolean isSuccess = WifiAdmin.getInstance(mContext).connectWifi(wifiConfiguration, true);
+						if (isSuccess) {
+							WifiAdmin.getInstance(mContext).saveConfiguration();
+						}
+					} else {
+						if (capabilities.toLowerCase().indexOf("wpa") != -1) {
+							WifiConfiguration wifiConfiguration = WifiAdmin.getInstance(mContext).createWifiConfiguration(ssid, password, 3, "wifi");
+							boolean isSuccess = WifiAdmin.getInstance(mContext).connectWifi(wifiConfiguration, true);
+							if (isSuccess) {
+								WifiAdmin.getInstance(mContext).saveConfiguration();
+							}
+						} else if (capabilities.toLowerCase().indexOf("wep") != -1) {
+							WifiConfiguration wifiConfiguration = WifiAdmin.getInstance(mContext).createWifiConfiguration(ssid, password, 2, "wifi");
+							boolean isSuccess = WifiAdmin.getInstance(mContext).connectWifi(wifiConfiguration, true);
+							if (isSuccess) {
+								WifiAdmin.getInstance(mContext).saveConfiguration();
+							}
+						}
+					}
+				} else {
+					mHandler.sendEmptyMessageDelayed(CONNECT_WIFI, 500);
+				}
+				break;
+			}
+		}
+	};
+
+	private void registerBroadcast() {
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+		mContext.registerReceiver(broadcastReceiver, filter);
+	}
+
+	private void unregisterBroadcast() {
+		mContext.unregisterReceiver(broadcastReceiver);
+	}
+
+	public BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+			if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(intent.getAction())) {
+				Parcelable parcelableExtra = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+				if (null != parcelableExtra) {
+					NetworkInfo networkInfo = (NetworkInfo) parcelableExtra;
+					switch (networkInfo.getState()) {
+					case CONNECTED:
+						if (mScanListener != null) {
+							mScanListener.connected();
+						}
+						break;
+					case CONNECTING:
+						if (mScanListener != null) {
+							mScanListener.connecting();
+						}
+						break;
+					case DISCONNECTED:
+						if (mScanListener != null) {
+							mScanListener.disconnected();
+						}
+						break;
+					case DISCONNECTING:
+						if (mScanListener != null) {
+							mScanListener.disconnecting();
+						}
+						break;
+					case SUSPENDED:
+						Log.e(TAG, "SUSPENDED");
+						break;
+					case UNKNOWN:
+						Log.e(TAG, "UNKNOWN");
+						break;
+					}
+				}
+			}
+		}
+	};
+
+}

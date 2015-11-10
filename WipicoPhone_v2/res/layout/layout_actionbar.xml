@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/actionbar_layout"
+    android:layout_width="fill_parent"
+    android:layout_height="@dimen/bg_actionbar_size"
+    android:layout_alignParentTop="true"
+    android:background="@drawable/bg_actionbar" >
+
+    <TextView
+        android:id="@+id/actionbar_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text=""
+        android:textColor="@android:color/white"
+        android:textSize="18sp" />
+
+</RelativeLayout>

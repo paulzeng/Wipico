@@ -1,0 +1,142 @@
+package com.chinasvc.wipicophone;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import android.app.Application;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.os.Build;
+import android.os.Environment;
+import android.util.Log;
+
+import com.chinasvc.wipico.bean.FileInfo;
+import com.chinasvc.wipicophone.bean.AudioBean;
+import com.chinasvc.wipicophone.image.WipicoImage;
+import com.chinasvc.wipicophone.service.UDPMessage;
+import com.chinasvc.wipicophone.util.FileTools;
+import com.chinasvc.wipicophone.util.PreferenceUtil;
+import com.chinasvc.wipicophone.util.WlanUtil;
+import com.chinasvc.wipicophone.db.DBHelper;
+
+import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
+import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
+
+public class WipicoApplication extends Application {
+
+	private String TAG = "WipicoApplication";
+	private boolean isDebug = false;
+
+	private static DBHelper dbHelper;
+	private static SQLiteDatabase db;
+
+	public static List<AudioBean> listMusics = new ArrayList<AudioBean>();
+	public static int audioPosition = -1;
+	public static List<WipicoImage> listCameras = new ArrayList<WipicoImage>();
+	public static int cameraPosition = -1;
+	public static List<WipicoImage> listGallerys = new ArrayList<WipicoImage>();
+	public static int galleryPosition = -1;
+	public static List<FileInfo> listMovies = new ArrayList<FileInfo>();
+	public static int videoPosition = -1;
+
+	public static WipicoApplication appInstance;
+	public static boolean needShowConnected = true;
+
+	private final String dir = "Wipico" + File.separator + "share" + File.separator;
+	public static String iconPath;
+	private String filePath;
+
+	private String localIp;
+	private WlanUtil wlanUtil;
+
+	@Override
+	public void onCreate() {
+		super.onCreate();
+
+		appInstance = this;
+
+		wlanUtil = new WlanUtil(this);
+
+		dbHelper = DBHelper.getInstance(this);
+		db = dbHelper.getWritableDatabase();
+
+		initImageLoader(getApplicationContext());
+
+		createDir();
+	}
+
+	public static SQLiteDatabase getDB() {
+		return db;
+	}
+
+	public static void openDB() {
+		if (!db.isOpen()) {
+			db = dbHelper.getWritableDatabase();
+		}
+	}
+
+	public static void closeDB() {
+		dbHelper.close();
+	}
+
+	public static void initImageLoader(Context context) {
+		DisplayImageOptions options = new DisplayImageOptions.Builder().showStubImage(R.drawable.ic_image_default).showImageForEmptyUri(R.drawable.ic_image_default)
+				.showImageOnFail(R.drawable.ic_image_default).imageScaleType(ImageScaleType.IN_SAMPLE_INT).cacheInMemory(true).cacheOnDisc(true).bitmapConfig(Bitmap.Config.RGB_565)
+				.build();
+		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(context).threadPriority(Thread.NORM_PRIORITY).denyCacheImageMultipleSizesInMemory()
+				.defaultDisplayImageOptions(options).discCacheFileNameGenerator(new Md5FileNameGenerator()).tasksProcessingOrder(QueueProcessingType.LIFO).build();
+		ImageLoader.getInstance().init(config);
+	}
+
+	public String getFilePath() {
+		return filePath;
+	}
+
+	public void setFilePath(String filePath) {
+		this.filePath = filePath;
+	}
+
+	/**
+	 * 创建应用目录
+	 */
+	public void createDir() {
+		filePath = Environment.getExternalStorageDirectory().getPath() + File.separator + dir;
+		FileTools.createDir(filePath);
+	}
+
+	public static String getIconPath(Context mContext) {
+		String iconPath = mContext.getFilesDir() + File.separator;
+		return iconPath;
+	}
+
+	public UDPMessage getMyUdpMessage(String msg, int type) {
+		UDPMessage message = new UDPMessage();
+		message.setType(type);
+		message.setSenderName(Build.MODEL);
+		message.setMsg(msg);
+		message.setDeviceCode(PreferenceUtil.getInstance(this).getUserCode());
+		message.setOwn(true);
+		return message;
+	}
+
+	public String getLocalIp() {
+		if (localIp == null) {
+			localIp = wlanUtil.getLocalIp();
+		}
+		if (isDebug) {
+			Log.i(TAG, "IP地址>>>>>>" + localIp);
+		}
+		return localIp;
+	}
+
+	public void setLocalIp(String ip) {
+		localIp = ip;
+	}
+
+}

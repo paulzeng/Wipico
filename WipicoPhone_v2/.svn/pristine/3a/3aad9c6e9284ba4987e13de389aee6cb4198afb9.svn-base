@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dip" >
+
+        <TextView
+            android:id="@+id/start_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerInParent="true"
+            android:layout_marginLeft="12dip"
+            android:text="00:00"
+            android:textColor="@android:color/black"
+            android:textSize="14sp" />
+
+        <SeekBar
+            android:id="@+id/seekBar"
+            style="@android:attr/progressBarStyleHorizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:layout_toLeftOf="@+id/end_time"
+            android:layout_toRightOf="@+id/start_time"
+            android:max="100"
+            android:maxHeight="2dip"
+            android:minHeight="2dip"
+            android:paddingLeft="10dip"
+            android:paddingRight="10dip"
+            android:progress="0"
+            android:progressDrawable="@drawable/player_controller_progressbar"
+            android:thumb="@drawable/player_thumb_selector"
+            android:thumbOffset="8dp" />
+
+        <TextView
+            android:id="@+id/end_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerInParent="true"
+            android:layout_marginRight="12dip"
+            android:text="00:00"
+            android:textColor="@android:color/black"
+            android:textSize="14sp" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dip"
+        android:orientation="horizontal" >
+
+        <ImageButton
+            android:id="@+id/btnRemote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/list_item_selector"
+            android:paddingBottom="8dip"
+            android:paddingTop="8dip"
+            android:src="@drawable/audio_desc" />
+
+        <ImageButton
+            android:id="@+id/btnPrev"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/list_item_selector"
+            android:paddingBottom="8dip"
+            android:paddingTop="8dip"
+            android:src="@drawable/audio_prev" />
+
+        <ImageButton
+            android:id="@+id/btnPlay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/list_item_selector"
+            android:paddingBottom="8dip"
+            android:paddingTop="8dip"
+            android:src="@drawable/audio_pause" />
+
+        <ImageButton
+            android:id="@+id/btnNext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/list_item_selector"
+            android:paddingBottom="8dip"
+            android:paddingTop="8dip"
+            android:src="@drawable/audio_next" />
+
+        <ImageButton
+            android:id="@+id/btnMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/list_item_selector"
+            android:paddingBottom="8dip"
+            android:paddingTop="8dip"
+            android:src="@drawable/audio_asc" />
+    </LinearLayout>
+
+</LinearLayout>

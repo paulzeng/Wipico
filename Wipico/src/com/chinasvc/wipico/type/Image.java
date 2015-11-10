@@ -1,0 +1,51 @@
+package com.chinasvc.wipico.type;
+
+public class Image {
+
+	/** 启动图片播放器的Action */
+	public static final String START_ACTION_IMAGE = "com.stream.imageplayer";
+
+	/** 图片播放器操作广播接收Action */
+	public static final String BROADCAST_ACTION_IMAGE = "com.stream.cmdimageplayer";
+
+	public static final int SERVER_CMD_IMAGE_ITEM_OPEN = 0x110b;
+	public static final int SERVER_CMD_IMAGE_ITEM_STOP = 0x110c;
+	public static final int SERVER_CMD_IMAGE_ITEM_TURN_LEFT = 0x110d;
+	public static final int SERVER_CMD_IMAGE_ITEM_TURN_RIGHT = 0x110e;
+	public static final int SERVER_CMD_IMAGE_ITEM_ZOOM_IN = 0x110f;
+	public static final int SERVER_CMD_IMAGE_ITEM_ZOOM_OUT = 0x1110;
+	public static final int SERVER_CMD_IMAGE_ITEM_CHANGE = 0x1111;
+
+	public static final String BUNDLE_OPEN_FILE_PATH = "file_path";
+	public static final String BUNDLE_MEDIA_URL_KEY = "media_url";
+	public static final String BUNDLE_SERVER_ITEM_KEY = "item_key";
+	public static final String BUNDLE_MEDIA_SEEKBAR_PROGRESS_KEY = "media_progress";
+
+	public static String BUNDLE_IMAGE_ACTION_FLAG = "image_flag";
+	/*** 缩放结束 */
+	public static final int IMAGE_FLAG_ONSCALEEND = 0x01;
+
+	/** 缩放 */
+	public static final int IMAGE_FLAG_ONSCALE = 0x02;
+
+	/** 滑动 */
+	public static final int IMAGE_FLAG_ONSCROLL = 0x03;
+
+	/** 双击 */
+	public static final int IMAGE_FLAG_ONDOUBLETAP = 0x04;
+
+	/** 放大 */
+	public static final int IMAGE_FLAG_ENLARGE = 0x05;
+
+	/** 缩小 */
+	public static final int IMAGE_FLAG_NARROW = 0x06;
+
+	public static String BUNDLE_IMAGE_CURRENT_MIDDLEX = "currentMiddleX";
+	public static String BUNDLE_IMAGE_CURRENT_MIDDLEY = "currentMiddleY";
+	public static String BUNDLE_IMAGE_CURRENT_SCALE = "currentScale";
+	public static String BUNDLE_IMAGE_DISTANCE_X = "distanceX";
+	public static String BUNDLE_IMAGE_DISTANCE_Y = "distanceY";
+	public static String BUNDLE_IMAGE_EVENT_X = "motionEventX";
+	public static String BUNDLE_IMAGE_EVENT_Y = "motionEventY";
+
+}

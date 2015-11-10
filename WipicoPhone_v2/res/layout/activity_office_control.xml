@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_activity_dark"
+    android:orientation="vertical" >
+
+    <include layout="@layout/layout_actionbar_stop" />
+
+    <com.chinasvc.wipicophone.widget.DirectionView
+        android:id="@+id/touch_area"
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_marginLeft="4dip"
+        android:layout_marginRight="4dip"
+        android:layout_marginTop="4dip"
+        android:layout_weight="1"
+        android:background="@drawable/bg_touch"
+        android:gravity="center" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="60dip"
+        android:layout_marginLeft="4dip"
+        android:layout_marginRight="60dip"
+        android:gravity="center"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/btnPrev"
+            android:layout_width="wrap_content"
+            android:layout_height="40dip"
+            android:layout_marginRight="4dp"
+            android:layout_weight="1"
+            android:background="@drawable/btn_office_control_selector"
+            android:text="@string/office_control_prev"
+            android:textColor="@color/btn_text_selector" />
+
+        <Button
+            android:id="@+id/btnNext"
+            android:layout_width="wrap_content"
+            android:layout_height="40dip"
+            android:layout_marginLeft="4dp"
+            android:layout_weight="1"
+            android:background="@drawable/btn_office_control_selector"
+            android:text="@string/office_control_next"
+            android:textColor="@color/btn_text_selector" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,133 @@
+package com.chinasvc.wipico.file;
+
+import java.io.File;
+import java.io.IOException;
+
+import org.apache.ftpserver.FtpServer;
+import org.apache.ftpserver.FtpServerFactory;
+import org.apache.ftpserver.ftplet.FtpException;
+import org.apache.ftpserver.listener.ListenerFactory;
+import org.apache.ftpserver.usermanager.PropertiesUserManagerFactory;
+
+import android.content.Context;
+
+import com.chinasvc.wipico.R;
+import com.chinasvc.wipico.util.FileUtil;
+
+/**
+ * Wipico 文件管理服务器
+ * 
+ * @since 1.0.0
+ * */
+public class WipicoFileServer {
+
+	/** 当前类的实例化 */
+	private static WipicoFileServer instance = null;
+
+	/** FtpServer类 */
+	private FtpServer mFtpServer = null;
+
+	private FileUtil fileUtil = null;
+
+	/** office配置 */
+	private String fileConfig = null;
+
+	/** 文件管理端口号 */
+	private int filePort = 32221;
+
+	private final static String SYSTEM_FILE_CONFIG = "/system/etc/users.properties";
+	private final static String USER_FILE_CONFIG = "/mnt/sdcard/users.properties";
+
+	/**
+	 * 构造WipicoFileServer实例
+	 * 
+	 * @param context
+	 *                context
+	 * */
+	public WipicoFileServer(Context context) {
+		fileUtil = FileUtil.getInstance(context);
+	}
+
+	/**
+	 * 返回当前类的实例化对象
+	 * 
+	 * @param context
+	 *                context
+	 * */
+	public static WipicoFileServer getInstance(Context context) {
+		if (instance == null) {
+			instance = new WipicoFileServer(context);
+		}
+		return instance;
+	}
+
+	/**
+	 * 初始化文件管理配置文件
+	 * 
+	 * @return 返回配置文件路径
+	 * */
+	private String initFileConfig() {
+		String useConfig;
+		File sysmfile = new File(SYSTEM_FILE_CONFIG);
+		if (sysmfile.exists()) {
+			useConfig = SYSTEM_FILE_CONFIG;
+		} else {
+			File mfile = new File(USER_FILE_CONFIG);
+			if (!mfile.exists()) {
+				try {
+					fileUtil.copyResourceFile(R.raw.users, USER_FILE_CONFIG);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			useConfig = USER_FILE_CONFIG;
+		}
+		return useConfig;
+	}
+
+	/**
+	 * 初始化Wipico 文件处理服务器
+	 * */
+	public void initialize() {
+		fileConfig = initFileConfig();
+	}
+
+	/**
+	 * 开启FTP服务器
+	 * */
+	public void startFileServer() {
+		if (mFtpServer == null) {
+			FtpServerFactory serverFactory = new FtpServerFactory();
+			ListenerFactory factory = new ListenerFactory();
+			PropertiesUserManagerFactory userManagerFactory = new PropertiesUserManagerFactory();
+			if (fileConfig == null) {
+				initialize();
+			}
+			File files = new File(fileConfig);
+			userManagerFactory.setFile(files);
+			serverFactory.setUserManager(userManagerFactory.createUserManager());
+			// 设置Ftp服务器端口号
+			factory.setPort(filePort);
+			// replace the default listener
+			serverFactory.addListener("default", factory.createListener());
+			// start the server
+			mFtpServer = serverFactory.createServer();
+			try {
+				mFtpServer.start();
+			} catch (FtpException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/**
+	 * 关闭文件管理服务器
+	 * */
+	public void stopFileServer() {
+		if (mFtpServer != null) {
+			mFtpServer.stop();
+			mFtpServer = null;
+		}
+	}
+
+}

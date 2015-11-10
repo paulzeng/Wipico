@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <ListView
+        android:id="@+id/mVideoListView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:cacheColorHint="@android:color/transparent"
+        android:divider="@drawable/list_divider_line_horizontal"
+        android:dividerHeight="0.1dp"
+        android:drawSelectorOnTop="false"
+        android:listSelector="@drawable/list_item_selector" >
+    </ListView>
+
+    <LinearLayout
+        android:id="@+id/videoEmptyView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone" >
+
+        <ImageView
+            android:id="@+id/videoEmptyImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/video_icon_loading" />
+
+        <TextView
+            android:id="@+id/videoEmptyValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="@string/msg_no_video"
+            android:textColor="#ff888888"
+            android:typeface="sans"
+            android:visibility="visible" />
+    </LinearLayout>
+
+</RelativeLayout>

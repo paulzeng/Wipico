@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_activity_dark"
+    android:orientation="vertical" >
+
+    <include layout="@layout/layout_actionbar" />
+
+    <com.chinasvc.wipicophone.widget.DirectionView
+        android:id="@+id/touch_area"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="60dip"
+        android:layout_marginLeft="4dip"
+        android:layout_marginRight="4dip"
+        android:layout_marginTop="4dip"
+        android:background="@drawable/bg_touch"
+        android:gravity="center" />
+
+</LinearLayout>

@@ -1,0 +1,135 @@
+package com.chinasvc.wipico.client;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import android.content.Context;
+import android.net.wifi.ScanResult;
+import android.util.Log;
+
+import com.chinasvc.wipico.WipicoClient;
+import com.chinasvc.wipico.bean.Device;
+import com.chinasvc.wipico.util.DeviceUtil;
+import com.chinasvc.wipico.util.WifiAdmin;
+
+/**
+ * 扫描匹配的WIFI ssid
+ * 
+ * @since 1.0.0
+ * */
+public class DiscoverySSID extends Thread {
+
+	private boolean isDebug = false;
+	private String TAG = "DiscoverySSID";
+
+	private List<Device> listDevices = new ArrayList<Device>();
+
+	private boolean running = true;
+
+	private ScanListener mScanListener;
+
+	private Context mContext;
+
+	private WipicoClient mWipicoClient;
+
+	/**
+	 * 构造方法
+	 * 
+	 * @param ip
+	 *                广播地址
+	 * */
+	public DiscoverySSID(Context context, WipicoClient wipicoClient) {
+		mWipicoClient = wipicoClient;
+		mContext = context;
+		listDevices = new ArrayList<Device>();
+	}
+
+	/**
+	 * 关闭扫描设备
+	 * */
+	public void closeScan() {
+		try {
+			running = false;
+			join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 开始扫描设备
+	 * */
+	public void startScan() {
+		running = true;
+		setDaemon(true);
+		start();
+	}
+
+	/**
+	 * SSID修正名称，去除前后的“”
+	 * */
+	private String ssidCorrect(String ssid) {
+		if (ssid.startsWith("\"")) {
+			ssid = ssid.substring(1);
+		}
+
+		if (ssid.endsWith("\"")) {
+			ssid = ssid.substring(0, ssid.length() - 1);
+		}
+		return ssid;
+	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		while (running) {
+			if (isDebug)
+				Log.i(TAG, "5s扫描设备>>>>>>>>>>>>");
+			List<ScanResult> listScanResults = WifiAdmin.getInstance(mContext).getScanResults();
+			for (ScanResult bean : listScanResults) {
+				if (DeviceUtil.isMatchSSID(ssidCorrect(bean.SSID))) {
+					listDevices.add(new Device(ssidCorrect(bean.SSID), bean.capabilities, null));
+				}
+			}
+			sendResult();
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/**
+	 * 设置扫描监听接口
+	 * */
+	public void setOnScanListener(ScanListener scanListener) {
+		this.mScanListener = scanListener;
+	}
+
+	private List<Device> preListDatas;
+
+	private int satus = -1;
+
+	private void sendResult() {
+		if (mScanListener != null) {
+			if (preListDatas != null && !preListDatas.equals(listDevices)) {
+				preListDatas.clear();
+				preListDatas.addAll(listDevices);
+				mScanListener.onResult(DeviceType.DEVICE_WIFI, listDevices);
+			} else if (preListDatas == null) {
+				preListDatas = new ArrayList<Device>();
+				preListDatas.addAll(listDevices);
+				mScanListener.onResult(DeviceType.DEVICE_WIFI, listDevices);
+			}
+
+			if (satus != DeviceUtil.checkDevice(mWipicoClient.getDevice(), listDevices)) {
+				satus = DeviceUtil.checkDevice(mWipicoClient.getDevice(), listDevices);
+				mScanListener.deviceStatus(satus);
+			}
+
+			listDevices.clear();
+		}
+	}
+
+}

@@ -1,0 +1,96 @@
+package com.chinasvc.wipicophone;
+
+import android.annotation.SuppressLint;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Message;
+import android.view.KeyEvent;
+import android.widget.Toast;
+
+import com.chinasvc.wipico.client.ActionHelper;
+import com.chinasvc.wipico.client.ControlHelper;
+import com.chinasvc.wipico.type.Mouse;
+
+public class ControlBaseActivity extends BaseActivity {
+
+	public Handler mThreadHandler = null;// 线程Handler
+
+	public final int HOME = 1;
+	public final int TOUCH = 2;
+	public final int MOUSE = 3;
+	public final int MOUSE_MOVE = 4;
+	public final int MOUSE_WHEEL = 5;
+
+	public final int KEY = 6;
+	public final int KEY_VALUE = 7;
+	public final int KEYBOARD_WRITE = 8;
+	public final int KEYBOARD_DELETE = 9;
+
+	public final int PLAY_OFFICE = 10;
+	public final int OPEN_FILE = 11;
+
+	/**
+	 * 初始化遥控器控制发送的Handler
+	 * */
+	@SuppressLint("HandlerLeak")
+	public void initThreadHandler() {
+		HandlerThread handlerThread = new HandlerThread("HandlerThread");
+		handlerThread.start();
+		mThreadHandler = new Handler(handlerThread.getLooper()) {
+			@Override
+			public void handleMessage(Message msg) {
+				if (MainActivity.mDevice != null) {
+					KeyEvent keyEvent;
+					switch (msg.what) {
+					case HOME:
+						keyEvent = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_HOME);
+						ControlHelper.sendControl(keyEvent, MainActivity.mDevice);
+						break;
+					case TOUCH:
+						int[][] numdata;
+						numdata = new int[12][8];
+						Bundle mBundle = msg.getData();
+						for (int i = 0; i < (msg.arg2 & 0xff); i++) {
+							numdata[i][0] = mBundle.getInt("x" + i);
+							numdata[i][1] = mBundle.getInt("y" + i);
+							numdata[i][2] = mBundle.getInt("id" + i);
+							numdata[i][3] = mBundle.getInt("thm" + i);
+						}
+						ControlHelper.sendTouch(msg.arg1, msg.arg2, numdata, MainActivity.mDevice);
+						break;
+					case MOUSE:
+						ControlHelper.sendMouse(msg.arg1, (msg.arg2 & 0xffff), (msg.arg2 >> 16 & 0xffff), MainActivity.mDevice);
+						break;
+					case MOUSE_MOVE:
+						ControlHelper.sendMouse(Mouse.MOUSE_MOVE, msg.arg1, msg.arg2, MainActivity.mDevice);
+						break;
+					case MOUSE_WHEEL:
+						ControlHelper.sendMouse(Mouse.MOUSE_WHEEL, msg.arg1, msg.arg2, MainActivity.mDevice);
+						break;
+					case KEY:
+						ControlHelper.sendControl((KeyEvent) msg.obj, MainActivity.mDevice);
+						break;
+					case KEY_VALUE:
+						ControlHelper.sendControl(msg.arg1, MainActivity.mDevice);
+						break;
+					case KEYBOARD_WRITE:
+						ActionHelper.sendKeyboardWrite((String) msg.obj, MainActivity.mDevice);
+						break;
+					case KEYBOARD_DELETE:
+						ActionHelper.sendKeyboardDelete(MainActivity.mDevice);
+						break;
+					case PLAY_OFFICE:
+						ActionHelper.openOffice((String) msg.obj, MainActivity.mDevice);
+						break;
+					case OPEN_FILE:
+						ActionHelper.openFile((String) msg.obj, MainActivity.mDevice);
+						break;
+					}
+				} else {
+					Toast.makeText(ControlBaseActivity.this, R.string.msg_no_device, Toast.LENGTH_SHORT).show();
+				}
+			}
+		};
+	}
+}

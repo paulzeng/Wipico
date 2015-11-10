@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="@dimen/footbar_height"
+    android:gravity="center_vertical" >
+
+    <TextView
+        android:id="@+id/nav_media"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:background="@drawable/bg_nav_selector"
+        android:drawableTop="@drawable/nav_video_selector"
+        android:gravity="center"
+        android:text="@string/nav_media"
+        android:textColor="@color/nav_text_selector"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/nav_image"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:background="@drawable/bg_nav_selector"
+        android:drawableTop="@drawable/nav_image_selector"
+        android:gravity="center"
+        android:text="@string/nav_image"
+        android:textColor="@color/nav_text_selector"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/nav_business"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:background="@drawable/bg_nav_selector"
+        android:drawableTop="@drawable/nav_business_selector"
+        android:gravity="center"
+        android:text="@string/nav_office"
+        android:textColor="@color/nav_text_selector"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/nav_application"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:background="@drawable/bg_nav_selector"
+        android:drawableTop="@drawable/nav_application_selector"
+        android:gravity="center"
+        android:text="@string/nav_app"
+        android:textColor="@color/nav_text_selector"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/nav_control"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:background="@drawable/bg_nav_selector"
+        android:drawableTop="@drawable/nav_control_selector"
+        android:gravity="center"
+        android:text="@string/nav_control"
+        android:textColor="@color/nav_text_selector"
+        android:textSize="14sp" />
+
+</LinearLayout>

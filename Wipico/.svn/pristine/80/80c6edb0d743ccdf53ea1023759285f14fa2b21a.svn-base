@@ -1,0 +1,88 @@
+package com.chinasvc.wipico.player;
+
+/**
+ * 多媒体状态类
+ * 
+ * @since 1.0.0
+ * */
+public class MediaState {
+
+	private int duration;
+	private int position;
+	private boolean isSlient;
+	private boolean isPlaying = true;
+
+	/**
+	 * 是否正在播放
+	 * */
+	public boolean isPlaying() {
+		return isPlaying;
+	}
+
+	/**
+	 * 设置是否在播放
+	 * 
+	 * @param isPlaying
+	 *                是否在播放
+	 * */
+	public void setPlaying(boolean isPlaying) {
+		this.isPlaying = isPlaying;
+	}
+
+	/**
+	 * 获取媒体的总时长
+	 * */
+	public int getDuration() {
+		return duration;
+	}
+
+	/**
+	 * 设置媒体的总时长
+	 * 
+	 * @param duration
+	 *                当期的播放位置，单位为ms
+	 * */
+	public void setDuration(int duration) {
+		this.duration = duration;
+	}
+
+	/**
+	 * 获取当前媒体的播放位置
+	 * */
+	public int getPosition() {
+		return position;
+	}
+
+	/**
+	 * 设置当前媒体的播放位置
+	 * 
+	 * @param position
+	 *                当期的播放位置，单位为ms
+	 * */
+	public void setPosition(int position) {
+		this.position = position;
+	}
+
+	/**
+	 * 获取是否静音
+	 * */
+	public boolean isSlient() {
+		return isSlient;
+	}
+
+	/**
+	 * 设置是否静音
+	 * 
+	 * @param isSlient
+	 *                是否静音，true为静音，false 为非静音
+	 * */
+	public void setSlient(boolean isSlient) {
+		this.isSlient = isSlient;
+	}
+
+	@Override
+	public String toString() {
+		return "MediaState [duration=" + duration + ", position=" + position + ", isSlient=" + isSlient + "]";
+	}
+
+}

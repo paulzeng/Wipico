@@ -1,0 +1,16 @@
+package com.chinasvc.wipico.player;
+
+public class PlayerConstant {
+
+	/** 端口号 */
+	protected static int MEDIA_UDP_PORT = 32243;
+
+	// -----多媒体同步标记
+	protected static final int PLAY_IMAGE = 0x01;
+	protected static final int PLAY_MUSIC = 0x02;
+	protected static final int PLAY_VIDEO = 0x03;
+
+	protected static final int PLAYING = 1;
+	protected static final int PLAY_FINISH = -1;
+
+}

@@ -1,0 +1,285 @@
+package com.chinasvc.wipicophone.fragment;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.chinasvc.wipico.bean.FileInfo;
+import com.chinasvc.wipicophone.MainActivity;
+import com.chinasvc.wipicophone.MediaTabActivity;
+import com.chinasvc.wipicophone.R;
+import com.chinasvc.wipicophone.VideoControlActivity;
+import com.chinasvc.wipicophone.WipicoApplication;
+import com.chinasvc.wipicophone.adapter.PopMenuAdapter;
+import com.chinasvc.wipicophone.adapter.VideoListAdapter;
+import com.chinasvc.wipicophone.bean.PopMenu;
+import com.chinasvc.wipicophone.bean.PopMenu.PopType;
+import com.chinasvc.wipicophone.util.DensityUtil;
+import com.chinasvc.wipicophone.util.FileTools;
+import com.chinasvc.wipicophone.util.FileUtil;
+import com.chinasvc.wipicophone.util.FileUtils;
+import com.chinasvc.wipicophone.util.MultimediaUtil;
+
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.drawable.BitmapDrawable;
+import android.media.MediaPlayer;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.AdapterView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
+
+/**
+ * */
+public class LocalVideoFragment extends BaseFragment implements OnItemClickListener {
+
+	private String TAG = "LocalVideoFragment";
+	private boolean isDebug = true;
+
+	private ListView mListView;
+	private VideoListAdapter adapter;
+	private LinearLayout emptyView;
+	private TextView emptyValue;
+
+	private List<String> sdPaths;
+
+	private View main_layout;
+	private View layout;
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		layout = inflater.inflate(R.layout.activity_local_video, container, false);
+		return layout;
+	}
+
+	@Override
+	public void onStart() {
+		super.onStart();
+
+		initThreadHandler();
+
+		sdPaths = FileUtil.getSDCardPath();
+		initView();
+		setPopDatas();
+	}
+
+	private void initView() {
+		main_layout = layout.findViewById(R.id.main_layout);
+
+		emptyView = (LinearLayout) layout.findViewById(R.id.videoEmptyView);
+		emptyView.setVisibility(View.GONE);
+		emptyValue = (TextView) layout.findViewById(R.id.videoEmptyValue);
+
+		mListView = (ListView) layout.findViewById(R.id.mVideoListView);
+		mListView.setOnItemClickListener(this);
+
+		initData();
+
+		adapter = new VideoListAdapter(getActivity(), WipicoApplication.listMovies, mListView);
+		mListView.setAdapter(adapter);
+		setView();
+	}
+
+	private void initData() {
+		if (FileUtil.isExternalStorageAvailable()) {
+			MultimediaUtil multimediaUtil = new MultimediaUtil(getActivity());
+			WipicoApplication.listMovies = multimediaUtil.getMovie();
+		} else {
+			WipicoApplication.listMovies = new ArrayList<FileInfo>();
+		}
+	}
+
+	private Handler mHandler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			adapter.notifyDataSetChanged();
+			if (WipicoApplication.listMovies.size() <= 0) {
+				emptyView.setVisibility(View.VISIBLE);
+				if (!FileUtil.isExternalStorageAvailable()) {
+					emptyValue.setText(R.string.msg_no_sdcard);
+				} else {
+					emptyValue.setText(R.string.msg_no_video);
+				}
+			} else {
+				emptyView.setVisibility(View.GONE);
+			}
+		}
+	};
+
+	private void setView() {
+		mHandler.obtainMessage().sendToTarget();
+	}
+
+	private int mPosition;
+
+	@Override
+	public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
+		mPosition = position;
+		int[] location = new int[2];
+		arg1.getLocationInWindow(location);
+		showPop(location[1], arg1.getHeight());
+	}
+
+	private View popupView;
+	private PopupWindow pop;
+	private ListView popListView;
+	private View main_pop;
+
+	private List<PopMenu> listPopDatas = new ArrayList<PopMenu>();
+
+	private void setPopDatas() {
+		listPopDatas = new ArrayList<PopMenu>();
+		listPopDatas.clear();
+		listPopDatas.add(new PopMenu(PopType.REMOTE_PLAY, getString(R.string.pop_remote_play)));
+		listPopDatas.add(new PopMenu(PopType.LOCAL_PLAY, getString(R.string.pop_local_play)));
+		// listPopDatas.add(new PopMenu(PopType.MULTI, "多选"));
+		listPopDatas.add(new PopMenu(PopType.SHARE, getString(R.string.pop_share)));
+	}
+
+	private void showPop(int y, int height) {
+		LayoutInflater mLayoutInflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		popupView = mLayoutInflater.inflate(R.layout.pop_list_menu, null);
+		popListView = (ListView) popupView.findViewById(R.id.mListView);
+		main_pop = popupView.findViewById(R.id.main_pop);
+		popListView.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View view, int position, long id) {
+				pop.dismiss();
+				FileInfo bean = WipicoApplication.listMovies.get(mPosition);
+
+				if (listPopDatas.get(position).getType() == PopType.LOCAL_PLAY) {
+					FileTools.openFile(bean.getPath(), getActivity());
+				} else if (listPopDatas.get(position).getType() == PopType.REMOTE_PLAY) {
+					if (MainActivity.mDevice != null) {
+						mThreadHandler.obtainMessage(VIDEO_SEND, bean.getPath()).sendToTarget();
+
+						WipicoApplication.videoPosition = mPosition;
+
+						Intent intent = new Intent(getActivity(), VideoControlActivity.class);
+						Bundle bundle = new Bundle();
+						bundle.putString("url", bean.getPath());
+						intent.putExtras(bundle);
+						startActivity(intent);
+					} else {
+						Toast.makeText(getActivity(), R.string.msg_no_device, Toast.LENGTH_SHORT).show();
+					}
+				} else if (listPopDatas.get(position).getType() == PopType.SHARE) {
+					if (((MediaTabActivity) (getActivity().getParent())).mainActivity.users.size() > 0 || MainActivity.mDevice != null) {
+						List<FileInfo> listShares = new ArrayList<FileInfo>();
+						FileInfo file = new FileInfo();
+						file.setPath(bean.getPath());
+						file.setName(bean.getName());
+						file.setSize(bean.getSize());
+						listShares.add(file);
+						((MediaTabActivity) (getActivity().getParent())).mainActivity.showShareView(listShares, 0);
+					} else {
+						Toast.makeText(getActivity(), R.string.msg_no_share, Toast.LENGTH_SHORT).show();
+					}
+				} else if (listPopDatas.get(position).getType() == PopType.MULTI) {
+
+				}
+			}
+		});
+		popListView.setAdapter(new PopMenuAdapter(getActivity(), listPopDatas));
+		pop = new PopupWindow(popupView, getResources().getDimensionPixelSize(R.dimen.gridview_column_3_width), LayoutParams.WRAP_CONTENT);
+		pop.setFocusable(true);
+		pop.update();
+		pop.setOutsideTouchable(true);
+		pop.setAnimationStyle(R.style.PopupAnimation);
+		pop.setBackgroundDrawable(new BitmapDrawable());
+
+		pop.showAtLocation(main_layout, Gravity.TOP, 0, correctPopPosition(y, height));
+	}
+
+	private int correctPopPosition(int y, int height) {
+		int offsetY;
+		int popHeight = listPopDatas.size() * getResources().getDimensionPixelSize(R.dimen.pop_item_height) + DensityUtil.dip2px(getActivity(), 9);
+		if ((y + height / 2 + popHeight) > (DensityUtil.getScreenHeight(getActivity()) - getResources().getDimensionPixelSize(R.dimen.footbar_height))) {
+			main_pop.setBackgroundResource(R.drawable.pop_bg_list_up);
+			offsetY = (y + height / 2) - popHeight;
+		} else {
+			main_pop.setBackgroundResource(R.drawable.pop_bg_list_down);
+			offsetY = y + height / 2;
+		}
+		return offsetY;
+	}
+
+	/** 扫描SD卡 */
+	private class ScanVideoTask extends AsyncTask<Void, Void, Void> {
+
+		@Override
+		protected void onPreExecute() {
+			// TODO Auto-generated method stub
+			super.onPreExecute();
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			// TODO Auto-generated method stub
+			setView();
+			// WipicoApplication.listMovies.addAll(listDatas);
+			super.onPostExecute(result);
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			if (!FileUtil.isExternalStorageAvailable()) {
+				// listDatas.clear();
+			} else {
+				for (String sd : sdPaths) {
+					eachAllMedias(new File(sd));
+				}
+			}
+			return null;
+		}
+
+		/** 遍历所有文件夹，查找出视频文件 */
+		public void eachAllMedias(File f) {
+			if (f != null && f.exists() && f.isDirectory()) {
+				File[] files = f.listFiles();
+				if (files != null) {
+					for (File file : f.listFiles()) {
+						if (file.isDirectory() && !file.getName().startsWith(".") && !file.getName().equalsIgnoreCase("Android")) {
+							eachAllMedias(file);
+						} else if (file.exists() && file.canRead() && FileUtils.isVideo(file)) {
+							FileInfo bean = new FileInfo();
+							bean.setPath(file.getPath());
+							bean.setSize(file.length());
+							bean.setName(file.getName());
+							MediaPlayer mMediaPlayer = new MediaPlayer();
+							try {
+								mMediaPlayer.setDataSource(file.getPath());
+								mMediaPlayer.prepare();
+								bean.setDuration(mMediaPlayer.getDuration());
+								mMediaPlayer.release();
+							} catch (IllegalArgumentException e) {
+								e.printStackTrace();
+							} catch (SecurityException e) {
+								e.printStackTrace();
+							} catch (IllegalStateException e) {
+								e.printStackTrace();
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+							// listDatas.add(bean);
+						}
+					}
+				}
+			}
+		}
+	}
+
+}

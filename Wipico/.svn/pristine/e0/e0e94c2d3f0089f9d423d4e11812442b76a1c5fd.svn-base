@@ -1,0 +1,9 @@
+package com.chinasvc.wipico.type;
+
+public class Mouse {
+
+	/** Mouse eventFlag */
+	public static final int MOUSE_WHEEL = 0x488C;
+	public static int MOUSE_MOVE = 0x4889;
+
+}

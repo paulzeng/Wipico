@@ -1,0 +1,65 @@
+package com.chinasvc.wipicophone;
+
+import java.util.ArrayList;
+
+import com.chinasvc.wipico.bean.FileInfo;
+import com.chinasvc.wipicophone.bean.AudioBean;
+import com.chinasvc.wipicophone.image.WipicoImage;
+import com.chinasvc.wipicophone.util.FileUtil;
+import com.chinasvc.wipicophone.util.MultimediaUtil;
+
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.os.SystemClock;
+
+public class WelcomeActivity extends Activity {
+
+	private MultimediaUtil multimediaUtil;
+
+	@SuppressLint("HandlerLeak")
+	Handler mHandler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case 0:
+				if (FileUtil.isExternalStorageAvailable()) {
+					// 是否存在SD卡
+					WipicoApplication.listMusics = multimediaUtil.getMusic();
+					WipicoApplication.listMovies = new ArrayList<FileInfo>();
+					WipicoApplication.listCameras = new ArrayList<WipicoImage>();
+					WipicoApplication.listGallerys = new ArrayList<WipicoImage>();
+				} else {
+					// 无SD卡
+					WipicoApplication.listCameras = new ArrayList<WipicoImage>();
+					WipicoApplication.listMusics = new ArrayList<AudioBean>();
+					WipicoApplication.listMovies = new ArrayList<FileInfo>();
+					WipicoApplication.listGallerys = new ArrayList<WipicoImage>();
+				}
+				Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
+				startActivity(intent);
+				finish();
+				break;
+			}
+			super.handleMessage(msg);
+		}
+	};
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_welcome);
+		multimediaUtil = new MultimediaUtil(WelcomeActivity.this);
+		new Thread() {
+			@Override
+			public void run() {
+				SystemClock.sleep(1500);
+				mHandler.sendEmptyMessage(0);
+			}
+		}.start();
+	}
+
+}

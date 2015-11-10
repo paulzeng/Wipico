@@ -1,0 +1,379 @@
+package com.chinasvc.wipico.server;
+
+import java.util.List;
+
+import com.chinasvc.wipico.bean.Device;
+import com.chinasvc.wipico.bean.ImageTransform;
+import com.chinasvc.wipico.bean.PhoneDevice;
+
+/**
+ * 服务器接收客户端请求监听接口
+ * 
+ * @since 1.0.0
+ * */
+public interface OperateListener {
+
+	/**
+	 * 打开指定路径的文件
+	 * 
+	 * @param filePath
+	 *                文件路径
+	 * */
+	public void openFile(String filePath);
+
+	/**
+	 * 安装游戏
+	 * 
+	 * @param mPackage
+	 *                游戏包名
+	 * @param url
+	 *                下载路径
+	 * */
+	public void installGame(String mPackage, String url);
+
+	/**
+	 * 卸载游戏
+	 * 
+	 * @param filePath
+	 *                文件路径
+	 * */
+	public void uninstallGame(String packName);
+
+	/**
+	 * 连接验证
+	 * 
+	 * @param type
+	 *                验证类型，2为连接成功，否则为请求验证.
+	 * @param devceName
+	 *                请求连接的设备名称
+	 * @param verification
+	 *                验证码
+	 * */
+	public void verification(int type, String devceName, String verification);
+
+	/**
+	 * 显式打开App
+	 * 
+	 * @param mPackage
+	 *                包名
+	 * @param mClass
+	 *                主类名
+	 * @param flag
+	 *                标记
+	 * */
+	public void openAppByClass(String mPackage, String mClass, int flag);
+
+	/**
+	 * 打开Game
+	 * */
+	public void openGame(String mPackage);
+
+	/**
+	 * 隐式调用App
+	 * */
+	public void openAppByAction(String action);
+
+	/**
+	 * 打开HDMI界面
+	 * 
+	 * */
+	public void openHDMI();
+
+	/**
+	 * 打开AV界面
+	 * */
+	public void openAV();
+
+	/**
+	 * 打开本地盘界面
+	 * */
+	public void openLocal();
+
+	/**
+	 * 打开U盘界面
+	 * */
+	public void openUDisk();
+
+	/**
+	 * 打开设备TF卡界面
+	 * */
+	public void openTF();
+
+	/**
+	 * 打开设备的设置界面
+	 * */
+	public void openSetting();
+
+	/**
+	 * 设备静音
+	 * */
+	public void deviceMute();
+
+	/**
+	 * 设备非静音
+	 * */
+	public void deviceDisMute();
+
+	/**
+	 * 打开office
+	 * */
+	public void openOffice(String filePath);
+
+	/**
+	 * 打开Dlna服务
+	 * */
+	public void startDlna();
+
+	/**
+	 * 关闭Dlna服务
+	 * */
+	public void stopDlna();
+
+	/**
+	 * 键盘输入
+	 * */
+	public void keyboardWrite(String value);
+
+	/**
+	 * 键盘删除
+	 * */
+	public void keyboardDelete();
+
+	/**
+	 * 设置音频的播放进度
+	 * 
+	 * @param ip
+	 *                发送请求的ip地址
+	 * @param position
+	 *                设置的进度值
+	 * */
+	public void setAudioSeek(Device device, int position);
+
+	/**
+	 * 停止音频播放器
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public void stopAudio(Device device);
+
+	/**
+	 * 播放音频播放器
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public void playAudio(Device device);
+
+	/**
+	 * 暂停音频播放器
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public void pauseAudio(Device device);
+
+	/**
+	 * 设置音频播放器静音
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public void muteAudio(Device device);
+
+	/**
+	 * 设置音频播放器非静音
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public void disMuteAudio(Device device);
+
+	/**
+	 * 增加音频播放器音量
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public void addAudioVolume(Device device);
+
+	/**
+	 * 减少音频播放器音量
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public void decreaseAudioVolume(Device device);
+
+	/**
+	 * 打开指定路径的音频
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * @param path
+	 *                音频路径
+	 * */
+	public void openAudio(Device device, String path);
+
+	/**
+	 * 设置视频播放进度
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * @param position
+	 *                进度值ms
+	 * */
+	public void setVideoSeek(Device device, int position);
+
+	/**
+	 * 停止视频播放器
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public void stopVideo(Device device);
+
+	/**
+	 * 播放视频播放器
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public void playVideo(Device device);
+
+	/**
+	 * 暂停视频播放器
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public void pauseVideo(Device device);
+
+	/**
+	 * 设置视频播放器静音
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public void muteVideo(Device device);
+
+	/**
+	 * 设置视频播放器非静音
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public void disMuteVideo(Device device);
+
+	/**
+	 * 增加视频播放器音量
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public void addVideoVolume(Device device);
+
+	/**
+	 * 减少视频播放器音量
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public void decreaseVideoVolume(Device device);
+
+	/**
+	 * 打开指定路径的视频
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * @param path
+	 *                视频路径
+	 * */
+	public void openVideo(Device device, String path);
+
+	/**
+	 * 打开指定路径的图片
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * @param path
+	 *                图片路径
+	 * */
+	public void openImage(Device device, String path);
+
+	/**
+	 * 停止图片播放器
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public void stopImage(Device device);
+
+	/**
+	 * 图片左转
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public void turnLeftImage(Device device);
+
+	/**
+	 * 图片右转
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public void turnRightImage(Device device);
+
+	/**
+	 * 图片放大
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public void zoomInImage(Device device);
+
+	/**
+	 * 图片缩小
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public void zoomOutImage(Device device);
+
+	/**
+	 * 图片变换
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * @param imageTransform
+	 *                变换类型
+	 * */
+	public void transformImage(Device device, ImageTransform imageTransform);
+
+	/**
+	 * 切换Wifi
+	 * 
+	 * @param ssid
+	 *                wifi 的ssid
+	 * @param password
+	 *                此Wifi的密码
+	 * @param capabilities
+	 *                加密方式
+	 * */
+	public void changeWifi(String ssid, String password, String capabilities);
+
+	/**
+	 * 切换Wifi
+	 * 
+	 * @param ssid
+	 *                wifi 的ssid
+	 * */
+	public void forgetWifi(String ssid);
+
+	/**
+	 * 脉搏
+	 * */
+	public void updateDevice(List<PhoneDevice> listDevices);
+
+}

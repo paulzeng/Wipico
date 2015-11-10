@@ -1,0 +1,14 @@
+package com.chinasvc.wipico.type;
+
+/**
+ * 鼠标配置
+ * */
+public class Mouse {
+
+	/** Mouse wheel */
+	public static final int MOUSE_WHEEL = 0x488C;
+
+	/** Mouse move */
+	public static int MOUSE_MOVE = 0x4889;
+
+}

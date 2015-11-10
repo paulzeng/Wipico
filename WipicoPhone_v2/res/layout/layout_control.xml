@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_activity"
+    android:scrollbars="none" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <RelativeLayout
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp" >
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:background="@drawable/bg_control_center" />
+
+            <Button
+                android:id="@+id/keyenter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:background="@drawable/btn_control_center_selector"
+                android:onClick="onKeyClick"
+                android:tag="23"
+                android:textColor="@color/text_grey_blue_selector"
+                android:textSize="21sp" />
+
+            <ImageButton
+                android:id="@+id/keyleft"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@id/keyenter"
+                android:background="@drawable/btn_control_left_selector"
+                android:onClick="onKeyClick"
+                android:src="@drawable/ic_control_left_selector"
+                android:tag="21"
+                android:text="" />
+
+            <ImageButton
+                android:id="@+id/keyright"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@id/keyenter"
+                android:background="@drawable/btn_control_right_selector"
+                android:onClick="onKeyClick"
+                android:src="@drawable/ic_control_right_selector"
+                android:tag="22"
+                android:text="" />
+
+            <ImageButton
+                android:id="@+id/keyup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/keyenter"
+                android:layout_centerHorizontal="true"
+                android:background="@drawable/btn_control_up_selector"
+                android:onClick="onKeyClick"
+                android:src="@drawable/ic_control_up_selector"
+                android:tag="19"
+                android:text="" />
+
+            <ImageButton
+                android:id="@+id/keydown"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/keyenter"
+                android:layout_centerHorizontal="true"
+                android:background="@drawable/btn_control_down_selector"
+                android:onClick="onKeyClick"
+                android:src="@drawable/ic_control_down_selector"
+                android:tag="20"
+                android:text="" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" >
+
+            <!-- 第一排 -->
+
+            <ImageButton
+                android:id="@+id/keyplaypause"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/btn_control_gn_selector"
+                android:onClick="onKeyClick"
+                android:src="@drawable/ic_control_play_selector"
+                android:tag="85"
+                android:text="" />
+
+            <ImageButton
+                android:id="@+id/keyhome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/keyplaypause"
+                android:layout_toLeftOf="@id/keyplaypause"
+                android:background="@drawable/btn_control_gn_selector"
+                android:onClick="onKeyClick"
+                android:src="@drawable/ic_control_home_selector"
+                android:tag="3"
+                android:text="" />
+
+            <ImageButton
+                android:id="@+id/keyback"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/keyplaypause"
+                android:layout_toRightOf="@id/keyplaypause"
+                android:background="@drawable/btn_control_gn_selector"
+                android:onClick="onKeyClick"
+                android:src="@drawable/ic_control_back_selector"
+                android:tag="4"
+                android:text="" />
+
+            <!-- 第二排 -->
+
+            <ImageButton
+                android:id="@+id/keyplaystop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/keyplaypause"
+                android:layout_centerHorizontal="true"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/btn_control_gn_selector"
+                android:onClick="onKeyClick"
+                android:src="@drawable/ic_control_stop_selector"
+                android:tag="86"
+                android:text="" />
+
+            <ImageButton
+                android:id="@+id/keyplayprev"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/keyplaystop"
+                android:layout_toLeftOf="@id/keyplaystop"
+                android:background="@drawable/btn_control_gn_selector"
+                android:onClick="onKeyClick"
+                android:src="@drawable/ic_control_pre_selector"
+                android:tag="88"
+                android:text="" />
+
+            <ImageButton
+                android:id="@+id/keyplaynext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/keyplaystop"
+                android:layout_toRightOf="@id/keyplaystop"
+                android:background="@drawable/btn_control_gn_selector"
+                android:onClick="onKeyClick"
+                android:src="@drawable/ic_control_next_selector"
+                android:tag="87"
+                android:text="" />
+
+            <!-- 第三排 -->
+
+            <ImageButton
+                android:id="@+id/keyvolplus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/keyplaystop"
+                android:layout_centerHorizontal="true"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/btn_control_gn_selector"
+                android:onClick="onKeyClick"
+                android:src="@drawable/ic_control_add_selector"
+                android:tag="24"
+                android:text="" />
+
+            <ImageButton
+                android:id="@+id/keyvoldec"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/keyvolplus"
+                android:layout_toLeftOf="@id/keyvolplus"
+                android:background="@drawable/btn_control_gn_selector"
+                android:onClick="onKeyClick"
+                android:src="@drawable/ic_control_des_selector"
+                android:tag="25"
+                android:text="" />
+
+            <ImageButton
+                android:id="@+id/keypower"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/keyvolplus"
+                android:layout_toRightOf="@id/keyvolplus"
+                android:background="@drawable/btn_control_gn_selector"
+                android:onClick="onKeyClick"
+                android:src="@drawable/ic_control_power_selector"
+                android:tag="26"
+                android:text="" />
+        </RelativeLayout>
+    </LinearLayout>
+
+</ScrollView>

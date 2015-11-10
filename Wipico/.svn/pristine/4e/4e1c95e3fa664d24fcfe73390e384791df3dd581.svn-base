@@ -1,0 +1,9 @@
+ftpserver.user.csvc.userpassword=21232F297A57A5A743894A0E4A801FC3
+ftpserver.user.csvc.homedirectory=/mnt
+ftpserver.user.csvc.enableflag=true
+ftpserver.user.csvc.writepermission=true
+ftpserver.user.csvc.maxloginnumber=0
+ftpserver.user.csvc.maxloginperip=0
+ftpserver.user.csvc.idletime=0
+ftpserver.user.csvc.uploadrate=0
+ftpserver.user.csvc.downloadrate=0

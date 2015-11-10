@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="game_array">
+        <item>水果忍者,com.halfbrick.fruitninja</item>
+        <item>真实赛车,com.polarbit.rthunderlite</item>
+        <item>极限摩托,com.droidhen.game.racingmoto</item>
+        <item>终极狂飙3D漂移,com.sxiaoao.car3d</item>
+    </string-array>
+
+</resources>

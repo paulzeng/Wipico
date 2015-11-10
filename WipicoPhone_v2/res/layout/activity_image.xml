@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_activity" >
+
+    <GridView
+        android:id="@+id/mGridView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:columnWidth="@dimen/gridview_column_3_width"
+        android:listSelector="@android:color/transparent"
+        android:numColumns="3"
+        android:visibility="visible" />
+
+    <LinearLayout
+        android:id="@+id/imageEmptyView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="invisible" >
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/no_file" />
+
+        <TextView
+            android:id="@+id/imageEmptyValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="@string/msg_no_file"
+            android:textColor="#ffaaaaaa"
+            android:typeface="sans"
+            android:visibility="visible" />
+    </LinearLayout>
+
+</RelativeLayout>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/history_left_item_selector"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/receiver "
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_marginBottom="4dip"
+            android:layout_marginLeft="8dip"
+            android:layout_marginTop="4dip"
+            android:singleLine="true"
+            android:text="接收自M030"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            android:typeface="sans" />
+
+        <TextView
+            android:id="@+id/sender "
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="4dip"
+            android:layout_marginRight="8dip"
+            android:layout_marginTop="4dip"
+            android:singleLine="true"
+            android:text="发送给M030"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            android:typeface="sans" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingLeft="12dip"
+        android:paddingRight="12dip" >
+
+        <ImageView
+            android:id="@+id/type"
+            android:layout_width="40dip"
+            android:layout_height="40dip"
+            android:layout_marginRight="8dip"
+            android:scaleType="centerInside"
+            android:src="@drawable/history_image" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dip"
+            android:layout_weight="1"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="2dp"
+                android:singleLine="true"
+                android:text="文件名"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                android:typeface="sans" />
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="100"
+                android:maxHeight="3dip"
+                android:minHeight="3dip"
+                android:progress="0"
+                android:progressDrawable="@drawable/player_controller_progressbar" />
+
+            <TextView
+                android:id="@+id/value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="2dp"
+                android:singleLine="true"
+                android:text="进度条"
+                android:textColor="@android:color/black"
+                android:textSize="10sp"
+                android:typeface="sans" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

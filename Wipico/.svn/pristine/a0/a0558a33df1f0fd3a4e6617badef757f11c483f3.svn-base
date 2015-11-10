@@ -1,0 +1,300 @@
+package com.chinasvc.wipico.file;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
+import org.apache.commons.net.ftp.FTPReply;
+import org.apache.commons.net.io.CopyStreamEvent;
+import org.apache.commons.net.io.CopyStreamListener;
+
+import com.chinasvc.wipico.bean.Device;
+
+import android.util.Log;
+
+/**
+ * Wipico 文件管理客户端
+ * 
+ * @since 1.0.0
+ * */
+public class WipicoFileClient {
+
+	private String TAG = "WipicoFileClient";
+
+	private FTPClient ftpClient;
+
+	private String server;
+	private int port;
+	private String userName;
+	private String userPassword;
+
+	public static long currentSize = 0;
+
+	private FileExceptionListener exceptionListener;
+
+	private final static String FILE_USER_NAME = "csvc";
+	private final static String FILE_PASSWORD = "admin";
+	private final static int FILE_PORT = 32221;
+
+	/**
+	 * 构造方法
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public WipicoFileClient(Device device) {
+		this.server = device.getDeviceIp();
+		this.port = FILE_PORT;
+		this.userName = FILE_USER_NAME;
+		this.userPassword = FILE_PASSWORD;
+		ftpClient = new FTPClient();
+	}
+
+	/**
+	 * 判断是否连接
+	 * */
+	public boolean isConnect() {
+		if (ftpClient != null && ftpClient.isConnected()) {
+			int reply;
+			reply = ftpClient.getReplyCode();
+			if (!FTPReply.isPositiveCompletion(reply)) {
+				return false;
+			} else {
+				return true;
+			}
+		} else {
+			ftpClient = new FTPClient();
+			return false;
+		}
+	}
+
+	/**
+	 * 链接文件服务服务器
+	 * 
+	 * @return 是否连接成功
+	 */
+	public boolean connect() {
+		if (isConnect()) {
+			// 已经连接,不用再连接
+			return true;
+		}
+		try {
+			int reply;
+			if (port > 0) {
+				ftpClient.connect(server, port);
+			} else {
+				// 默认端口号
+				ftpClient.connect(server);
+			}
+			ftpClient.login(userName, userPassword);// 登录
+			ftpClient.enterLocalPassiveMode();// 被动模式
+			ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
+			ftpClient.setControlEncoding("UTF-8");
+			ftpClient.setBufferSize(1024 * 1024);
+
+			ftpClient.setCopyStreamListener(new CopyStreamListener() {
+				@Override
+				public void bytesTransferred(long arg0, int arg1, long arg2) {
+					currentSize += arg1;
+				}
+
+				@Override
+				public void bytesTransferred(CopyStreamEvent arg0) {
+					// TODO Auto-generated method stub
+				}
+			});
+
+			reply = ftpClient.getReplyCode();
+			if (!FTPReply.isPositiveCompletion(reply)) {
+				ftpClient.disconnect();
+				// 服务器拒绝访问
+				// System.err.println("FTP server refused connection.");
+				if (exceptionListener != null) {
+					exceptionListener.refused();
+				}
+				ftpClient = null;
+				return false;
+			} else {
+				return true;
+			}
+		} catch (IOException e) {
+			if (ftpClient.isConnected()) {
+				try {
+					ftpClient.disconnect();
+				} catch (IOException f) {
+					// do nothing
+				}
+			}
+			// System.err.println("Could not connect to server.");
+			if (exceptionListener != null) {
+				exceptionListener.exception();
+			}
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	/***
+	 * 上传文件或者文件夹
+	 * 
+	 * @param remotePath
+	 *                服务器要保存的目录
+	 * @param file
+	 *                要上传的文件,本地路径
+	 * 
+	 * @return 是否成功
+	 * */
+	public boolean upFolder(String remotePath, File file) {
+		String fileName = file.getName();
+		String filePath = file.getPath();
+		if (!connect()) {
+			// 未连接成功了
+			return false;
+		}
+		if (file.isDirectory()) {
+			try {
+				ftpClient.changeWorkingDirectory(new String(remotePath.getBytes(), "iso-8859-1"));
+				ftpClient.makeDirectory(new String(fileName.getBytes(), "iso-8859-1"));
+				String[] files = file.list();
+				ftpClient.changeWorkingDirectory(new String((remotePath + File.separator + fileName).getBytes(), "iso-8859-1"));
+				for (int i = 0; i < files.length; i++) {
+					File file1 = new File(filePath + File.separator + files[i]);
+					if (file1.isDirectory()) {
+						// 是目录，递归调用
+						String newRemotePath = remotePath + File.separator + fileName;
+						upFolder(newRemotePath, file1);
+						ftpClient.changeWorkingDirectory(new String((remotePath + File.separator + fileName).getBytes(), "iso-8859-1"));
+					} else {
+						// 是文件直接上传
+						File file2 = new File(filePath + File.separator + files[i]);
+						FileInputStream in = new FileInputStream(file2);
+						ftpClient.storeFile(new String(file2.getName().getBytes(), "iso-8859-1"), in);
+						in.close();
+					}
+				}
+				return true;
+			} catch (IOException e) {
+				exceptionListener.exception();
+				e.printStackTrace();
+				return false;
+			}
+		} else {
+			try {
+				File file2 = new File(file.getPath());
+				ftpClient.changeWorkingDirectory(new String(remotePath.getBytes(), "iso-8859-1"));
+				FileInputStream input = new FileInputStream(file2);
+				ftpClient.storeFile(new String(file2.getName().getBytes(), "iso-8859-1"), input);
+				input.close();
+				return true;
+			} catch (UnsupportedEncodingException e) {
+				exceptionListener.exception();
+				e.printStackTrace();
+				return false;
+			} catch (IOException e) {
+				exceptionListener.exception();
+				e.printStackTrace();
+				return false;
+			}
+		}
+	}
+
+	/***
+	 * 下载文件
+	 * 
+	 * @param remotePath
+	 *                服务器要保存的目录
+	 * @param file
+	 *                要下载的文件
+	 * 
+	 * @return 是否成功
+	 * */
+	public boolean downFolder(String localPath, File file) {
+		if (!connect()) {
+			// 未连接成功了
+			return false;
+		}
+		try {
+			File myFlie = new File(file.getPath());
+			ftpClient.changeWorkingDirectory(new String(myFlie.getParent().getBytes(), "iso-8859-1"));// 转移到FTP服务器目录
+			File localFile = new File(localPath + File.separator + file.getName());
+			FileOutputStream is = new FileOutputStream(localFile);
+			ftpClient.retrieveFile(new String(file.getName().getBytes(), "iso-8859-1"), is);
+			is.close();
+			return true;
+		} catch (IOException e) {
+			exceptionListener.exception();
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public static File ftpFile2fileInfo(FTPFile ftpFile, String remotePath, String name) {
+		if (remotePath.equals("/")) {
+			File file = new File(remotePath + name);
+			return file;
+		} else {
+			File file = new File(remotePath + File.separator + ftpFile.getName());
+			return file;
+		}
+	}
+
+	public boolean isExistFile(String ftpFilePath) {
+		if (!connect()) {
+			// 未连接成功了
+			return false;
+		}
+
+		File file = new File(ftpFilePath);
+		FTPFile[] ftpFiles;
+		try {
+			ftpClient.changeWorkingDirectory(new String(file.getParent().getBytes(), "iso-8859-1"));
+			ftpFiles = ftpClient.listFiles(file.getParent());
+			for (FTPFile ftpFile : ftpFiles) {
+				if (ftpFile.getName().equals(file.getName())) {
+					return true;
+				}
+			}
+			return false;
+		} catch (IOException e) {
+			exceptionListener.exception();
+			e.printStackTrace();
+			return false;
+		}
+
+	}
+
+	/**
+	 * 关闭连接
+	 */
+	public void disconnect() {
+		try {
+			if (ftpClient != null && ftpClient.isConnected())
+				ftpClient.logout();
+			ftpClient.disconnect();
+			ftpClient = null;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 设置异常监听接口
+	 * */
+	public void setFileExceptionListener(FileExceptionListener exceptionListener) {
+		this.exceptionListener = exceptionListener;
+	}
+
+	/**
+	 * 文件管理服务连接异常接口
+	 * */
+	public interface FileExceptionListener {
+		public void exception();
+
+		public void refused();
+	}
+
+}

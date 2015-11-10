@@ -1,0 +1,41 @@
+package com.chinasvc.wipicophone.db;
+
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+
+public class DBHelper extends SQLiteOpenHelper {
+
+	private static final int DB_VERSION = 2;
+	public static final String DB_NAME = "chinavc_remote.db";
+	private static DBHelper mDBHelper;
+
+	public static final String OFFICE_LOCAL_TABLE = "local_office";// 本地Office表
+	public static final String HISTORY_TABLE = "history";// 历史记录
+
+	private static final String CREATE_OFFICE_LOCAL_TABLE = "CREATE TABLE IF NOT EXISTS " + OFFICE_LOCAL_TABLE + "( name text, path text, size integer )";
+	private static final String CREATE_HISTORY_TABLE = "CREATE TABLE IF NOT EXISTS " + HISTORY_TABLE
+			+ "( name text, path text, size integer, type integer, time text,  user text, state integer, transfer integer, progress integer, user_type integer )";
+
+	public static synchronized DBHelper getInstance(Context context) {
+		if (mDBHelper == null) {
+			mDBHelper = new DBHelper(context);
+		}
+		return mDBHelper;
+	}
+
+	private DBHelper(Context context) {
+		super(context, DB_NAME, null, DB_VERSION);
+	}
+
+	@Override
+	public void onCreate(SQLiteDatabase db) {
+		db.execSQL(CREATE_OFFICE_LOCAL_TABLE);
+		db.execSQL(CREATE_HISTORY_TABLE);
+	}
+
+	@Override
+	public void onUpgrade(SQLiteDatabase arg0, int arg1, int arg2) {
+		// TODO Auto-generated method stub
+	}
+}

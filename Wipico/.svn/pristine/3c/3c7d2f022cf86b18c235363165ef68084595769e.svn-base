@@ -1,0 +1,96 @@
+package com.chinasvc.wipico.client;
+
+import com.chinasvc.wipico.type.Keyboard;
+import com.chinasvc.wipico.util.WipicoConstant;
+
+/**
+ * 任务操作类，如：文件、服务、办公、输入法等的操作类
+ * 
+ * @since 1.0.0
+ * */
+public class ActionHelper {
+
+	/**
+	 * 打开设备端的文件
+	 * 
+	 * @param path
+	 *                路径名称
+	 * 
+	 * @param ip
+	 *                发往的IP地址
+	 * */
+	public static void openFile(String path, String ip) {
+		ActionSender.sendFile(WipicoConstant.SERVER_CMD_OPEN_FILE, path, ip);
+	}
+
+	/**
+	 * 打开设备端Dlna服务
+	 * 
+	 * @param ip
+	 *                发往的IP地址
+	 * */
+	public static void startDlnaService(String ip) {
+		ActionSender.sendCmd(WipicoConstant.SERVER_CMD_START_DLNA, ip);
+	}
+
+	/**
+	 * 打开设备端Dlna服务
+	 * 
+	 * @param ip
+	 *                发往的IP地址
+	 * */
+	public static void stopDlnaService(String ip) {
+		ActionSender.sendCmd(WipicoConstant.SERVER_CMD_STOP_DLNA, ip);
+	}
+
+	/**
+	 * 键盘输入
+	 * 
+	 * @param ip
+	 *                发往的IP地址
+	 * */
+	public static void sendKeyboardWrite(String value, String ip) {
+		ActionSender.sendKeyBoard(Keyboard.KEYBOARD_SUBMIT, value, ip);
+	}
+
+	/**
+	 * 键盘删除
+	 * 
+	 * @param ip
+	 *                发往的IP地址
+	 * */
+	public static void sendKeyboardDelete(String ip) {
+		ActionSender.sendCmd(Keyboard.KEYBOARD_SUBMIT, ip);
+	}
+
+	/**
+	 * 发送Office,需开启FTP服务器,和客户端
+	 * 
+	 * @param ip
+	 *                发往的IP地址
+	 * 
+	 * */
+	public static void openOffice(String path, String ip) {
+		ActionSender.sendOffice(WipicoConstant.SERVER_CMD_OFFICE, path, ip);
+	}
+
+	/**
+	 * 发送验证
+	 * 
+	 * @param flag
+	 *                类型, 2为连接成功 ,否则为请求验证
+	 * 
+	 * @param deviceName
+	 *                设备名称
+	 * 
+	 * @param verification
+	 *                验证码
+	 * 
+	 * @param ip
+	 *                发往的IP地址
+	 * */
+	public static void sendVerification(int flag, String deviceName, String verification, String ip) {
+		ActionSender.sendVerification(WipicoConstant.SERVER_CMD_VERIFICATION, flag, deviceName, verification, ip);
+	}
+
+}

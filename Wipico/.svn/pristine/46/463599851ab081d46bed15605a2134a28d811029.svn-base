@@ -1,0 +1,91 @@
+package com.chinasvc.wipico.sync;
+
+import android.content.Context;
+import android.content.Intent;
+
+public class DeviceStateSyncSender {
+
+	private Context mContext;
+	private SyncThread syncThread;
+	private int flag = 0;
+	private String wifi = "";
+
+	/**
+	 * 构造方法
+	 * 
+	 * @param context
+	 * */
+	public DeviceStateSyncSender(Context context) {
+		mContext = context;
+	}
+
+	public void setDeviceState(int flag) {
+		this.flag = flag;
+	}
+
+	public void setDeviceSSID(String wifiSSID) {
+		this.wifi = wifiSSID;
+	}
+
+	public void startSync() {
+		if (syncThread != null) {
+			syncThread.stopSync();
+		}
+		syncThread = new SyncThread();
+		syncThread.startSync();
+	}
+
+	private void stopSync() {
+		if (syncThread != null) {
+			syncThread.stopSync();
+		}
+	}
+
+	private class SyncThread extends Thread {
+
+		boolean needSync = true;
+
+		/**
+		 * 启动同步
+		 * */
+		public void startSync() {
+			needSync = true;
+			start();
+		}
+
+		/**
+		 * 停止同步
+		 * */
+		public void stopSync() {
+			needSync = false;
+			try {
+				join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
+		@Override
+		public void run() {
+			while (needSync) {
+				Intent intent = new Intent();
+				intent.setAction(SyncConstants.BROADCAST_WIPICO_SYNC_DEVICE);
+				intent.putExtra(SyncConstants.START_APPLICATION_FLAG, flag);
+				intent.putExtra(SyncConstants.WIFI_SSID, wifi);
+				mContext.sendBroadcast(intent);
+				try {
+					sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	/**
+	 * 关闭音频接收控制
+	 * */
+	public void closeAsync() {
+		stopSync();
+	}
+}

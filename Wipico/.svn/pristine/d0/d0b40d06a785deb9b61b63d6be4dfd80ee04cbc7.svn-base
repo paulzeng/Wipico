@@ -1,0 +1,216 @@
+package com.chinasvc.wipico.bean;
+
+/**
+ * 表示一个文件信息类
+ * 
+ * @author
+ **/
+public class FileInfo {
+
+	/** 主键 */
+	private long id;
+	/** 文件名称 */
+	private String name;
+	/** 文件路径 */
+	private String path;
+	/** 文件大小 */
+	private long size;
+	/** 是否是目录（默认为否） */
+	private boolean isDirectory = false;
+	/** 可读？ */
+	private boolean canRead = false;
+	/** 文件个数 */
+	private int fileCount = 0;
+	/** 文件夹的个数 */
+	private int folderCount = 0;
+	/** 有无被选中 */
+	private boolean isChecked;
+	/** 视频音乐总时长 */
+	private int duration;
+	/** 音乐缩略图id */
+	private long albumId;
+	/** 文件名首字母索引 */
+	private String letter;
+	/** 艺术家 */
+	private String artist;
+	/** 是否在播放 */
+	private boolean isPlay;
+
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getPath() {
+		return path;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
+	}
+
+	public long getSize() {
+		return size;
+	}
+
+	public void setSize(long size) {
+		this.size = size;
+	}
+
+	public boolean isDirectory() {
+		return isDirectory;
+	}
+
+	public void setDirectory(boolean isDirectory) {
+		this.isDirectory = isDirectory;
+	}
+
+	public boolean isCanRead() {
+		return canRead;
+	}
+
+	public void setCanRead(boolean canRead) {
+		this.canRead = canRead;
+	}
+
+	public int getFileCount() {
+		return fileCount;
+	}
+
+	public void setFileCount(int fileCount) {
+		this.fileCount = fileCount;
+	}
+
+	public int getFolderCount() {
+		return folderCount;
+	}
+
+	public void setFolderCount(int folderCount) {
+		this.folderCount = folderCount;
+	}
+
+	public boolean isChecked() {
+		return isChecked;
+	}
+
+	public void setChecked(boolean isChecked) {
+		this.isChecked = isChecked;
+	}
+
+	public int getDuration() {
+		return duration;
+	}
+
+	public void setDuration(int duration) {
+		this.duration = duration;
+	}
+
+	public long getAlbumId() {
+		return albumId;
+	}
+
+	public void setAlbumId(long albumId) {
+		this.albumId = albumId;
+	}
+
+	public String getLetter() {
+		return letter;
+	}
+
+	public void setLetter(String letter) {
+		this.letter = letter;
+	}
+
+	public String getArtist() {
+		return artist;
+	}
+
+	public void setArtist(String artist) {
+		this.artist = artist;
+	}
+
+	public boolean isPlay() {
+		return isPlay;
+	}
+
+	public void setPlay(boolean isPlay) {
+		this.isPlay = isPlay;
+	}
+
+	@Override
+	public String toString() {
+		return "FileInfo [id=" + id + ", name=" + name + ", path=" + path + ", size=" + size + ", isDirectory=" + isDirectory + ", canRead=" + canRead + ", fileCount=" + fileCount
+				+ ", folderCount=" + folderCount + ", isChecked=" + isChecked + ", duration=" + duration + ", albumId=" + albumId + ", letter=" + letter + ", artist=" + artist
+				+ ", isPlay=" + isPlay + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (albumId ^ (albumId >>> 32));
+		result = prime * result + (canRead ? 1231 : 1237);
+		result = prime * result + duration;
+		result = prime * result + fileCount;
+		result = prime * result + folderCount;
+		result = prime * result + (int) (id ^ (id >>> 32));
+		result = prime * result + (isChecked ? 1231 : 1237);
+		result = prime * result + (isDirectory ? 1231 : 1237);
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((path == null) ? 0 : path.hashCode());
+		result = prime * result + (int) (size ^ (size >>> 32));
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		FileInfo other = (FileInfo) obj;
+		if (albumId != other.albumId)
+			return false;
+		if (canRead != other.canRead)
+			return false;
+		if (duration != other.duration)
+			return false;
+		if (fileCount != other.fileCount)
+			return false;
+		if (folderCount != other.folderCount)
+			return false;
+		if (id != other.id)
+			return false;
+		if (isChecked != other.isChecked)
+			return false;
+		if (isDirectory != other.isDirectory)
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (path == null) {
+			if (other.path != null)
+				return false;
+		} else if (!path.equals(other.path))
+			return false;
+		if (size != other.size)
+			return false;
+		return true;
+	}
+
+}

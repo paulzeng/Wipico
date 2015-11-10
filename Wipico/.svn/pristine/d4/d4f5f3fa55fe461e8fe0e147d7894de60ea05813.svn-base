@@ -1,0 +1,690 @@
+package com.chinasvc.wipico;
+
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.chinasvc.wipico.bean.Device;
+import com.chinasvc.wipico.bean.ImageTransform;
+import com.chinasvc.wipico.bean.PhoneDevice;
+import com.chinasvc.wipico.file.WipicoFileServer;
+import com.chinasvc.wipico.player.PlayerConstant;
+import com.chinasvc.wipico.server.OperateListener;
+import com.chinasvc.wipico.sync.SyncConstants;
+import com.chinasvc.wipico.sync.SyncPlayer;
+import com.chinasvc.wipico.type.Audio;
+import com.chinasvc.wipico.type.Image;
+import com.chinasvc.wipico.type.Keyboard;
+import com.chinasvc.wipico.type.Recovery;
+import com.chinasvc.wipico.type.Resolution;
+import com.chinasvc.wipico.type.Screen;
+import com.chinasvc.wipico.type.Video;
+import com.chinasvc.wipico.util.WipicoConstant;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Message;
+import android.util.Log;
+
+/**
+ * Wipico服务器
+ * 
+ * @since 1.0.0
+ * */
+public class WipicoServer {
+
+	private boolean isDebug = false;
+	private String TAG = "";
+
+	private final int DEFAULT_PORT = 32220;
+	/** 端口号 */
+	private int wipicoPort = DEFAULT_PORT;
+
+	/** 超时 */
+	private final int DEFAULT_TIMEOUT = 2000;
+	private int wipicoTimeout = DEFAULT_TIMEOUT;
+
+	private final int DEFAULT_DATA_LENGTH = 1024;
+	private int wipico_data_length = DEFAULT_DATA_LENGTH;
+
+	private WipicoThread mWipicoThread = null;
+	private OperateListener mOperateListener = null;
+
+	private Context mContext;
+
+	private WipicoFileServer wipicoFileServer;
+
+	/**
+	 * 构造方法
+	 * 
+	 * @param context
+	 * */
+	public WipicoServer(Context context) {
+		mContext = context;
+		version = getVersionName();
+	}
+
+	/**
+	 * 启动文件管理服务器
+	 * */
+	private void startFileServer() {
+		stopFileServer();
+		wipicoFileServer = WipicoFileServer.getInstance(mContext);
+		wipicoFileServer.initialize();
+		wipicoFileServer.startFileServer();
+	}
+
+	/**
+	 * 停止文件管理服务器
+	 * */
+	private void stopFileServer() {
+		if (wipicoFileServer != null) {
+			wipicoFileServer.stopFileServer();
+		}
+	}
+
+	/**
+	 * 返回WipicoFileServer实例对象
+	 * 
+	 * @return WipicoFileServer
+	 * */
+	protected WipicoFileServer getWipicoFileServer() {
+		return wipicoFileServer;
+	}
+
+	/**
+	 * 启动Wipico服务
+	 * 
+	 * @param useFile
+	 *                是否使用文件管理功能
+	 * */
+	public void startWipico(boolean useFile) {
+		if (mWipicoThread != null) {
+			mWipicoThread.stopWipico();
+			mWipicoThread = null;
+		}
+		mWipicoThread = new WipicoThread();
+		mWipicoThread.startWipico();
+
+		if (useFile) {
+			startFileServer();
+		}
+
+		// 注册个广播接收播放器的状态的
+		registerReceiver();
+	}
+
+	private void registerReceiver() {
+		initThreadHandler();
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(PlayerConstant.BROADCAST_UPDATE_MEDIA);
+		filter.addAction(SyncConstants.BROADCAST_WIPICO_SYNC_DEVICE);
+		filter.addAction(SyncConstants.BROADCAST_WIPICO_SYNC_GAME);
+		mContext.registerReceiver(broadcastReceiver, filter);
+	}
+
+	private void unregisterReceiver() {
+		mContext.unregisterReceiver(broadcastReceiver);
+	}
+
+	private int playFlag = 0;
+	private int playState = PlayerConstant.PLAY_DEFAULT;
+	private int playDuration = 0;
+	private int playProgress = 0;
+	private int playVolume = 0;
+	private int playVolumeMax = 0;
+	private boolean isSilent = false;
+
+	private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+			if (intent.getAction().equals(PlayerConstant.BROADCAST_UPDATE_MEDIA)) {
+				playFlag = intent.getIntExtra(PlayerConstant.KEY_PLAY_FLAG, 0);// 播放标记，0为没播放啥，1为图片，2为音乐，3为视频
+				playState = intent.getIntExtra(PlayerConstant.KEY_PLAY_STATE, PlayerConstant.PLAY_DEFAULT);// 播放状态，true为正在播放，false为不在播放
+				playDuration = intent.getIntExtra(PlayerConstant.KEY_PLAY_DURATION, 0);// 总时长，图片总时长为0，视频，音乐的为总时长
+				playProgress = intent.getIntExtra(PlayerConstant.KEY_PLAY_PROGRESS, 0);// 当前进度，图片当前进度为0，视频，音乐为当前进度
+				playVolume = intent.getIntExtra(PlayerConstant.KEY_PLAY_VOLUME, 0);
+				playVolumeMax = intent.getIntExtra(PlayerConstant.KEY_PLAY_VOLUME_MAX, 0);
+				isSilent = intent.getBooleanExtra(PlayerConstant.KEY_PLAY_SILENT, false);
+				mThreadHandler.sendEmptyMessage(ASYNC);
+			} else if (intent.getAction().equals(SyncConstants.BROADCAST_WIPICO_SYNC_DEVICE)) {
+				application_flag = intent.getIntExtra(SyncConstants.START_APPLICATION_FLAG, 0);// 当前显示的应用标记
+				wifi_ssid = intent.getStringExtra(SyncConstants.WIFI_SSID);
+				mThreadHandler.sendEmptyMessage(ASYNC_DEVICE);
+			} else if (intent.getAction().equals(SyncConstants.BROADCAST_WIPICO_SYNC_GAME)) {
+				mThreadHandler.sendEmptyMessage(ASYNC_GAME);
+			}
+		}
+	};
+
+	private String getVersionName() {
+		// 获取packagemanager的实例
+		PackageManager packageManager = mContext.getPackageManager();
+		// getPackageName()是你当前类的包名，0代表是获取版本信息
+		PackageInfo packInfo;
+		String version;
+		try {
+			packInfo = packageManager.getPackageInfo(mContext.getPackageName(), 0);
+			version = packInfo.versionName;
+		} catch (NameNotFoundException e) {
+			return "";
+		}
+		return version;
+	}
+
+	private int application_flag = 0;
+	private String wifi_ssid = "";
+	private String version = "";
+
+	private Handler mThreadHandler = null;// 线程Handler
+
+	private final int ASYNC = 0;
+	private final int ASYNC_DEVICE = 1;
+	private final int ASYNC_GAME = 2;
+
+	protected void initThreadHandler() {
+		HandlerThread handlerThread = new HandlerThread("HandlerThread");
+		handlerThread.start();
+		mThreadHandler = new Handler(handlerThread.getLooper()) {
+			@Override
+			public void handleMessage(Message msg) {
+				switch (msg.what) {
+				case ASYNC:
+					for (PhoneDevice bean : listEquipments) {
+						SyncPlayer.sendProgresss(playFlag, playProgress, playDuration, playState, isSilent, playVolume, playVolumeMax, bean.getDeviceIp());
+					}
+					break;
+				case ASYNC_DEVICE:
+					for (PhoneDevice bean : listEquipments) {
+						SyncPlayer.sendDeviceSync(application_flag, wifi_ssid, version, bean.getDeviceIp());
+					}
+					break;
+				case ASYNC_GAME:
+					for (PhoneDevice bean : listEquipments) {
+						SyncPlayer.sendGameSync(bean.getDeviceIp());
+					}
+					break;
+				}
+			}
+		};
+	}
+
+	/**
+	 * 关闭Wipico服务
+	 * */
+	public void stopWipico() {
+		if (mWipicoThread != null) {
+			mWipicoThread.stopWipico();
+			mWipicoThread = null;
+		}
+		stopFileServer();
+		// 注销播放器的状态接收器
+		unregisterReceiver();
+	}
+
+	/**
+	 * Wipico服务线程
+	 * */
+	private class WipicoThread extends Thread {
+
+		private boolean isRunning = false;
+
+		/**
+		 * 停止线程
+		 * */
+		protected void stopWipico() {
+			isRunning = false;
+			try {
+				join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
+		/**
+		 * 开启线程
+		 * */
+		protected void startWipico() {
+			isRunning = true;
+			start();
+		}
+
+		@Override
+		public void run() {
+			byte[] message = new byte[wipico_data_length];
+			try {
+				DatagramSocket datagramSocket = new DatagramSocket(wipicoPort);
+				datagramSocket.setSoTimeout(wipicoTimeout);
+				DatagramPacket datagramPacket = new DatagramPacket(message, message.length);
+				while (isRunning) {
+					try {
+						datagramSocket.receive(datagramPacket);
+						procEvent(datagramPacket.getData(), datagramPacket.getAddress().getHostAddress());
+					} catch (SocketTimeoutException e) {
+
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+				datagramSocket.close();
+			} catch (SocketException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/**
+	 * 设置操作请求监听接口
+	 * 
+	 * @param operateListener
+	 *                操作请求监听接口
+	 * */
+	public void setOnOperateListener(OperateListener operateListener) {
+		this.mOperateListener = operateListener;
+	}
+
+	/**
+	 * Wipico处理客户端任务
+	 * 
+	 * @param data
+	 *                请求数据
+	 * @param ip
+	 *                请求ip
+	 * */
+	private void procEvent(byte[] data, String ip) {
+		DataInputStream is = new DataInputStream(new ByteArrayInputStream(data));
+		int serverCmd = 0;
+		try {
+			serverCmd = is.readInt();
+			if (isDebug)
+				Log.i(TAG, "Wipico>>CMD>>" + serverCmd);
+			switch (serverCmd) {
+			case WipicoConstant.SERVER_CMD_OPEN_FILE:
+				String filePath = is.readUTF();
+				if (isDebug)
+					Log.i(TAG, "SERVER_CMD_OPEN_FILE>>打开文件>>" + filePath);
+				if (mOperateListener != null) {
+					mOperateListener.openFile(filePath);
+				}
+				break;
+			case WipicoConstant.SERVER_CMD_VERIFICATION:
+				int type = is.readInt();// 2为连接成功
+				String verification_device = is.readUTF();// 设备名称
+				String verification = is.readUTF();// 验证码
+				if (mOperateListener != null) {
+					mOperateListener.verification(type, verification_device, verification);
+				}
+				break;
+			case WipicoConstant.SERVER_CMD_KEYBOARD:
+				int keyboard_type = is.readInt();
+				switch (keyboard_type) {
+				case Keyboard.KEYBOARD_SUBMIT:
+					String value = is.readUTF();
+					if (mOperateListener != null) {
+						mOperateListener.keyboardWrite(value);
+					}
+					break;
+				case Keyboard.KEYBOARD_DELETE:
+					if (mOperateListener != null) {
+						mOperateListener.keyboardDelete();
+					}
+					break;
+				}
+				break;
+			case WipicoConstant.SERVER_CMD_SCREEN:
+				int screen_type = is.readInt();
+				Log.i("TAG", "画面调整>>>>>>>" + screen_type);
+				Intent mScreenBroasdcast = new Intent(Screen.BROADCAST_ACTION_SCREEN);
+				switch (screen_type) {
+				case Screen.SCREEN_ENLARGE:
+					mScreenBroasdcast.putExtra(Screen.SCREEN_TYPE, Screen.SCREEN_ENLARGE);
+					mContext.sendBroadcast(mScreenBroasdcast);
+					break;
+				case Screen.SCREEN_NARROW:
+					mScreenBroasdcast.putExtra(Screen.SCREEN_TYPE, Screen.SCREEN_NARROW);
+					mContext.sendBroadcast(mScreenBroasdcast);
+					break;
+				}
+				break;
+			case WipicoConstant.SERVER_CMD_RECOVERY:
+				Log.i("TAG", "恢复出厂设置>>>>>>>");
+				Intent mRecoveryBroasdcast = new Intent(Recovery.BROADCAST_ACTION_RECOVERY);
+				mContext.sendBroadcast(mRecoveryBroasdcast);
+				break;
+			case WipicoConstant.SERVER_CMD_RESOLUTION:
+				int resolution_type = is.readInt();
+				Log.i("TAG", "分辨率调整>>>>>>>" + resolution_type);
+				Intent mResolutionBroasdcast = new Intent(Resolution.BROADCAST_ACTION_RESOLUTION);
+				switch (resolution_type) {
+				case Resolution.RESOLUTION_1280_720_50HZ:
+					mResolutionBroasdcast.putExtra(Resolution.RESOLUTION_TYPE, Resolution.RESOLUTION_1280_720_50HZ);
+					mContext.sendBroadcast(mResolutionBroasdcast);
+					break;
+				case Resolution.RESOLUTION_1280_720_60HZ:
+					mResolutionBroasdcast.putExtra(Resolution.RESOLUTION_TYPE, Resolution.RESOLUTION_1280_720_60HZ);
+					mContext.sendBroadcast(mResolutionBroasdcast);
+					break;
+				case Resolution.RESOLUTION_1920_1080_50HZ:
+					mResolutionBroasdcast.putExtra(Resolution.RESOLUTION_TYPE, Resolution.RESOLUTION_1920_1080_50HZ);
+					mContext.sendBroadcast(mResolutionBroasdcast);
+					break;
+				case Resolution.RESOLUTION_1920_1080_60HZ:
+					mResolutionBroasdcast.putExtra(Resolution.RESOLUTION_TYPE, Resolution.RESOLUTION_1920_1080_60HZ);
+					mContext.sendBroadcast(mResolutionBroasdcast);
+					break;
+				}
+				break;
+			case WipicoConstant.SERVER_CMD_AV:
+				if (mOperateListener != null) {
+					mOperateListener.openAV();
+				}
+				break;
+			case WipicoConstant.SERVER_CMD_HDMI:
+				if (mOperateListener != null) {
+					mOperateListener.openHDMI();
+				}
+				break;
+			case WipicoConstant.SERVER_CMD_LOCAL:
+				if (mOperateListener != null) {
+					mOperateListener.openLocal();
+				}
+				break;
+			case WipicoConstant.SERVER_CMD_TFCARD:
+				if (mOperateListener != null) {
+					mOperateListener.openTF();
+				}
+				break;
+			case WipicoConstant.SERVER_CMD_UDISK:
+				if (mOperateListener != null) {
+					mOperateListener.openUDisk();
+				}
+				break;
+			case WipicoConstant.SERVER_CMD_SETTING:
+				if (mOperateListener != null) {
+					mOperateListener.openSetting();
+				}
+				break;
+			case WipicoConstant.SERVER_CMD_OFFICE:
+				if (mOperateListener != null) {
+					String filepath = is.readUTF();
+					mOperateListener.openOffice(filepath);
+				}
+				break;
+			case WipicoConstant.SERVER_CMD_OPEN_APP_BY_ACTION:
+				String action = is.readUTF();
+				if (mOperateListener != null) {
+					mOperateListener.openAppByAction(action);
+				}
+				break;
+			case WipicoConstant.SERVER_CMD_OPEN_APP_BY_CLASS:
+				String mPackage = is.readUTF();
+				String mClass = is.readUTF();
+				int flag = is.readInt();
+				if (mOperateListener != null) {
+					mOperateListener.openAppByClass(mPackage, mClass, flag);
+				}
+				break;
+			case WipicoConstant.SERVER_CMD_AUDIO_MUTE:
+				mOperateListener.deviceMute();
+				break;
+			case WipicoConstant.SERVER_CMD_AUDIO_DISMUTE:
+				mOperateListener.deviceDisMute();
+				break;
+			case WipicoConstant.SERVER_CMD_OPEN_GAME:
+				if (mOperateListener != null) {
+					mOperateListener.openGame(is.readUTF());
+				}
+				break;
+			case WipicoConstant.SERVER_CMD_INSTALL_GAME:
+				if (mOperateListener != null) {
+					mOperateListener.installGame(is.readUTF());
+				}
+				break;
+			case WipicoConstant.SERVER_CMD_UNINSTALL_GAME:
+				if (mOperateListener != null) {
+					mOperateListener.uninstallGame(is.readUTF());
+				}
+				break;
+			case WipicoConstant.WIFI_CONNECT:
+				String ssid = is.readUTF();
+				String password = is.readUTF();
+				String capabilities = is.readUTF();
+				mOperateListener.changeWifi(ssid, password, capabilities);
+				break;
+			case WipicoConstant.PULSE:
+				PhoneDevice phoneDevice = new PhoneDevice(is.readUTF(), ip);
+				if (listEquipments.indexOf(phoneDevice) < 0) {
+					listEquipments.add(phoneDevice);
+					if (mOperateListener != null) {
+						mOperateListener.updateDevice(listEquipments);
+					}
+				}
+				mHandler.removeMessages(PULSE_STOP);
+				Message msg = new Message();
+				msg.what = PULSE_STOP;
+				msg.obj = phoneDevice;
+				mHandler.sendMessageDelayed(msg, 5000);
+				break;
+			case WipicoConstant.SERVER_CMD_AUDIO:
+				int musicCmd = is.readInt();// 读取二级指令
+				switch (musicCmd) {
+				case Audio.SERVER_CMD_MUSIC_ITME_SEEKBAR:
+					int progress = is.readInt();
+					if (mOperateListener != null) {
+						Device device = new Device("", ip);
+						mOperateListener.setAudioSeek(device, progress);
+					}
+					break;
+				case Audio.SERVER_CMD_MUSIC_ITME_OPEN:
+					String path = is.readUTF();
+					if (mOperateListener != null) {
+						Device device = new Device("", ip);
+						mOperateListener.openAudio(device, path);
+					}
+					break;
+				case Audio.SERVER_CMD_MUSIC_ITME_STOP:
+					if (mOperateListener != null) {
+						Device device = new Device("", ip);
+						mOperateListener.stopAudio(device);
+					}
+					break;
+				case Audio.SERVER_CMD_MUSIC_ITME_PLAY:
+					if (mOperateListener != null) {
+						Device device = new Device("", ip);
+						mOperateListener.playAudio(device);
+					}
+					break;
+				case Audio.SERVER_CMD_MUSIC_ITME_PAUSE:
+					if (mOperateListener != null) {
+						Device device = new Device("", ip);
+						mOperateListener.pauseAudio(device);
+					}
+					break;
+				case Audio.SERVER_CMD_MUSIC_ITME_MUTE:
+					if (mOperateListener != null) {
+						Device device = new Device("", ip);
+						mOperateListener.muteAudio(device);
+					}
+					break;
+				case Audio.SERVER_CMD_MUSIC_ITME_VOICE:
+					if (mOperateListener != null) {
+						Device device = new Device("", ip);
+						mOperateListener.disMuteAudio(device);
+					}
+					break;
+				case Audio.SERVER_CMD_MUSIC_ITME_VOICE_ADD:
+					if (mOperateListener != null) {
+						Device device = new Device("", ip);
+						mOperateListener.addAudioVolume(device);
+					}
+					break;
+				case Audio.SERVER_CMD_MUSIC_ITME_VOICE_DESC:
+					if (mOperateListener != null) {
+						Device device = new Device("", ip);
+						mOperateListener.decreaseAudioVolume(device);
+					}
+					break;
+				}
+				break;
+			case WipicoConstant.SERVER_CMD_VIDEO:
+				int movieCmd = is.readInt();// 读取二级指令
+				switch (movieCmd) {
+				case Video.SERVER_CMD_MOVIE_ITEM_SEEKBAR:
+					int progress = is.readInt();
+					if (mOperateListener != null) {
+						Device device = new Device("", ip);
+						mOperateListener.setVideoSeek(device, progress);
+					}
+					break;
+				case Video.SERVER_CMD_MOVIE_ITEM_OPEN:
+					String path = is.readUTF();
+					if (mOperateListener != null) {
+						Device device = new Device("", ip);
+						mOperateListener.openVideo(device, path);
+					}
+					break;
+				case Video.SERVER_CMD_MOVIE_ITEM_STOP:
+					if (mOperateListener != null) {
+						Device device = new Device("", ip);
+						mOperateListener.stopVideo(device);
+					}
+					break;
+				case Video.SERVER_CMD_MOVIE_ITEM_PLAY:
+					if (mOperateListener != null) {
+						Device device = new Device("", ip);
+						mOperateListener.playVideo(device);
+					}
+					break;
+				case Video.SERVER_CMD_MOVIE_ITEM_PAUSE:
+					if (mOperateListener != null) {
+						Device device = new Device("", ip);
+						mOperateListener.pauseVideo(device);
+					}
+					break;
+				case Video.SERVER_CMD_MOVIE__ITME_MUTE:
+					if (mOperateListener != null) {
+						Device device = new Device("", ip);
+						mOperateListener.muteVideo(device);
+					}
+					break;
+				case Video.SERVER_CMD_MOVIE__ITME_VOICE:
+					if (mOperateListener != null) {
+						Device device = new Device("", ip);
+						mOperateListener.disMuteVideo(device);
+					}
+					break;
+				case Video.SERVER_CMD_MOVIE_ITME_VOICE_ADD:
+					if (mOperateListener != null) {
+						Device device = new Device("", ip);
+						mOperateListener.addVideoVolume(device);
+					}
+					break;
+				case Video.SERVER_CMD_MOVIE_ITME_VOICE_DESC:
+					if (mOperateListener != null) {
+						Device device = new Device("", ip);
+						mOperateListener.decreaseVideoVolume(device);
+					}
+					break;
+				}
+				break;
+			case WipicoConstant.SERVER_CMD_IMAGE:
+				int imageCmd = is.readInt();// 读取二级指令
+				switch (imageCmd) {
+				case Image.SERVER_CMD_IMAGE_ITEM_OPEN:
+					String path = is.readUTF();
+					if (mOperateListener != null) {
+						Device device = new Device("", ip);
+						mOperateListener.openImage(device, path);
+					}
+					break;
+				case Image.SERVER_CMD_IMAGE_ITEM_STOP:
+					if (mOperateListener != null) {
+						Device device = new Device("", ip);
+						mOperateListener.stopImage(device);
+					}
+					break;
+				case Image.SERVER_CMD_IMAGE_ITEM_TURN_LEFT:
+					if (mOperateListener != null) {
+						Device device = new Device("", ip);
+						mOperateListener.turnLeftImage(device);
+					}
+					break;
+				case Image.SERVER_CMD_IMAGE_ITEM_TURN_RIGHT:
+					if (mOperateListener != null) {
+						Device device = new Device("", ip);
+						mOperateListener.turnRightImage(device);
+					}
+					break;
+				case Image.SERVER_CMD_IMAGE_ITEM_ZOOM_IN:
+					if (mOperateListener != null) {
+						Device device = new Device("", ip);
+						mOperateListener.zoomInImage(device);
+					}
+					break;
+				case Image.SERVER_CMD_IMAGE_ITEM_ZOOM_OUT:
+					if (mOperateListener != null) {
+						Device device = new Device("", ip);
+						mOperateListener.zoomOutImage(device);
+					}
+					break;
+				case Image.SERVER_CMD_IMAGE_ITEM_CHANGE:
+					// 图片手势操作放大缩小移动
+					Device device = new Device("", ip);
+					int actionFlag = is.readInt();
+					float middleX = is.readFloat();
+					float middleY = is.readFloat();
+					float scale = is.readFloat();
+					float distanceX = is.readFloat();
+					float distanceY = is.readFloat();
+					float eventX = is.readFloat();
+					float eventY = is.readFloat();
+					ImageTransform imageTransform = new ImageTransform(actionFlag, middleX, middleY, scale, distanceX, distanceY, eventX, eventY);
+					if (mOperateListener != null) {
+						mOperateListener.transformImage(device, imageTransform);
+					}
+					break;
+				}
+				break;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private final int PULSE_STOP = 0;
+
+	private List<PhoneDevice> listEquipments = new ArrayList<PhoneDevice>();
+
+	private Handler mHandler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			// TODO Auto-generated method stub
+			PhoneDevice device = (PhoneDevice) msg.obj;
+			switch (msg.what) {
+			case PULSE_STOP:
+				if (listEquipments.indexOf(device) >= 0) {
+					listEquipments.remove(device);
+					if (mOperateListener != null) {
+						mOperateListener.updateDevice(listEquipments);
+					}
+				}
+				break;
+			}
+		}
+
+	};
+}

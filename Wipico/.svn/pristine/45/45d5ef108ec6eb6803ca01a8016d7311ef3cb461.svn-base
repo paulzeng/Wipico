@@ -1,0 +1,8 @@
+package com.chinasvc.wipico.client;
+
+public class DeviceType {
+
+	public static final int DEVICE_COMMON = 0;
+	public static final int DEVICE_WIFI = 1;
+
+}

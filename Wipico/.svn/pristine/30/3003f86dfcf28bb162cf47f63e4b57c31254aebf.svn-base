@@ -1,0 +1,9 @@
+package com.chinasvc.wipico.client;
+
+public class DeviceStatus {
+
+	public static final int STATUS_NO_CONNECTED = 0;
+	public static final int STATUS_CONNECTED = 1;
+	public static final int STATUS_DISCONNECTED = 2;
+
+}

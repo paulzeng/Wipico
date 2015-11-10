@@ -1,0 +1,102 @@
+<TabHost xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/tabhost"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/bg_activity" >
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical" >
+
+        <TabWidget
+            android:id="@android:id/tabs"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <RelativeLayout
+            android:id="@+id/nav_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true" >
+
+            <include
+                android:layout_width="fill_parent"
+                android:layout_height="@dimen/footbar_height"
+                layout="@layout/layout_footbar" />
+
+            <include
+                android:id="@+id/layout_share"
+                android:layout_width="fill_parent"
+                android:layout_height="@dimen/footbar_height"
+                layout="@layout/layout_share"
+                android:visibility="invisible" />
+        </RelativeLayout>
+
+        <FrameLayout
+            android:id="@android:id/tabcontent"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_above="@+id/nav_layout" >
+        </FrameLayout>
+
+        <RelativeLayout
+            android:id="@+id/layout_menu"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <ImageView
+                android:id="@+id/bg_menu_dialog"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#80000000"
+                android:visibility="invisible" />
+
+            <include
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="75dip"
+                android:layout_marginLeft="27dip"
+                android:layout_marginRight="27dip"
+                layout="@layout/menu_dialog"
+                android:visibility="invisible" />
+
+            <FrameLayout
+                android:layout_width="60dip"
+                android:layout_height="60dip"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginBottom="48dip" >
+
+                <ImageView
+                    android:id="@+id/btn_menu"
+                    android:layout_width="60dip"
+                    android:layout_height="60dip"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_menu_selector" />
+
+                <ImageView
+                    android:id="@+id/ic_menu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_menu" />
+
+                <TextView
+                    android:id="@+id/history_message_1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right|top"
+                    android:background="@drawable/history_bg_count"
+                    android:gravity="center"
+                    android:text=""
+                    android:textColor="@android:color/white"
+                    android:textSize="10sp"
+                    android:visibility="invisible" />
+            </FrameLayout>
+        </RelativeLayout>
+    </RelativeLayout>
+
+</TabHost>

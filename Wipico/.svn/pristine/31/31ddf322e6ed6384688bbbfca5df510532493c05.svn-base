@@ -1,0 +1,117 @@
+package com.chinasvc.wipico.bean;
+
+/**
+ * 图片变换类
+ * 
+ * @since 1.0.0
+ * */
+public class ImageTransform {
+
+	/** 变换类别 */
+	private int flag;
+
+	/** 中心点X坐标 */
+	private float middleX;
+	/** 中心点Y坐标 */
+	private float middleY;
+	/** 缩放比例 */
+	private float scale;
+
+	/** Scroll移动的X坐标 */
+	private float distanceX;
+	/** Scroll移动的Y坐标 */
+	private float distanceY;
+
+	/** 触发事件的X坐标 */
+	private float eventX;
+	/** 触发事件的Y坐标 */
+	private float eventY;
+
+	public ImageTransform() {
+	}
+
+	public ImageTransform(int flag, float middleX, float middleY, float scale, float distanceX, float distanceY, float eventX, float eventY) {
+		this.flag = flag;
+
+		this.middleX = middleX;
+		this.middleY = middleY;
+		this.scale = scale;
+
+		this.distanceX = distanceX;
+		this.distanceY = distanceY;
+
+		this.eventX = eventX;
+		this.eventY = eventY;
+	}
+
+	public int getFlag() {
+		return flag;
+	}
+
+	public void setFlag(int flag) {
+		this.flag = flag;
+	}
+
+	public float getMiddleX() {
+		return middleX;
+	}
+
+	public void setMiddleX(float middleX) {
+		this.middleX = middleX;
+	}
+
+	public float getMiddleY() {
+		return middleY;
+	}
+
+	public void setMiddleY(float middleY) {
+		this.middleY = middleY;
+	}
+
+	public float getScale() {
+		return scale;
+	}
+
+	public void setScale(float scale) {
+		this.scale = scale;
+	}
+
+	public float getDistanceX() {
+		return distanceX;
+	}
+
+	public void setDistanceX(float distanceX) {
+		this.distanceX = distanceX;
+	}
+
+	public float getDistanceY() {
+		return distanceY;
+	}
+
+	public void setDistanceY(float distanceY) {
+		this.distanceY = distanceY;
+	}
+
+	public float getEventX() {
+		return eventX;
+	}
+
+	public void setEventX(float eventX) {
+		this.eventX = eventX;
+	}
+
+	public float getEventY() {
+		return eventY;
+	}
+
+	public void setEventY(float eventY) {
+		this.eventY = eventY;
+	}
+
+	@Override
+	public String toString() {
+		return "ImageTransform [flag=" + flag + ", middleX=" + middleX + ", middleY=" + middleY + ", scale=" + scale + ", distanceX=" + distanceX + ", distanceY=" + distanceY + ", eventX="
+				+ eventX + ", eventY=" + eventY + "]";
+	}
+
+}

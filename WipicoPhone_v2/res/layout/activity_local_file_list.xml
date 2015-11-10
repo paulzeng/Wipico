@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="40dip"
+        android:background="@drawable/bg_summary"
+        android:gravity="center_vertical"
+        android:paddingLeft="8dip"
+        android:text="@string/office_summary"
+        android:textColor="@android:color/black"
+        android:textSize="14sp" />
+
+    <com.chinasvc.wipicophone.widget.ptr.PullToRefreshListView
+        xmlns:ptr="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/fileListView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:cacheColorHint="@android:color/transparent"
+        android:divider="@drawable/list_divider_line_horizontal"
+        android:dividerHeight="0.1dp"
+        android:fadingEdge="none"
+        android:fastScrollEnabled="false"
+        android:footerDividersEnabled="false"
+        android:headerDividersEnabled="false"
+        android:listSelector="@android:color/transparent"
+        android:smoothScrollbar="true"
+        android:visibility="visible"
+        ptr:ptrHeaderTextColor="#ff555555" />
+
+</LinearLayout>

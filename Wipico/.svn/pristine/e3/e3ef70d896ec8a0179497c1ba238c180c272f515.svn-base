@@ -1,0 +1,554 @@
+package com.chinasvc.wipico.util;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Iterator;
+import java.util.List;
+
+import android.content.Context;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+
+/**
+ * Wifi管理类
+ * 
+ * */
+public class WifiAdmin {
+
+	/** 类的实例化 */
+	private static WifiAdmin instance;
+
+	private Context mContext;
+	private WifiManager mWifiManager;
+
+	private WifiManager.WifiLock mWifiLock;
+
+	/**
+	 * 构造WifiAdmin实例化对象
+	 * 
+	 * @param context
+	 * */
+	public WifiAdmin(Context context) {
+		mContext = context;
+		this.mWifiManager = ((WifiManager) mContext.getSystemService(Context.WIFI_SERVICE));
+	}
+
+	/**
+	 * 返回当前类的实例化对象
+	 * 
+	 * @param context
+	 * */
+	public static WifiAdmin getInstance(Context context) {
+		if (instance == null) {
+			instance = new WifiAdmin(context);
+		}
+		return instance;
+	}
+
+	/**
+	 * 获取Wifi连接信息
+	 * 
+	 * @return WifiInfo
+	 * */
+	public WifiInfo getConnectionInfo() {
+		return mWifiManager.getConnectionInfo();
+	}
+
+	/**
+	 * 获取Wifi配置好的Wifi列表
+	 * 
+	 * @return WifiInfo
+	 * */
+	public List<WifiConfiguration> getConfiguredNetworks() {
+		return mWifiManager.getConfiguredNetworks();
+	}
+
+	/**
+	 * 判断某个SSID的WIFI是否存在已经配置好的Wifi配置列表
+	 * 
+	 * @param ssid
+	 * 
+	 * @return 是否存在，true则存在，否则不存在
+	 * */
+	public boolean isExsitsConfigured(String ssid) {
+		// 遍历配置好的Wifi列表
+		Iterator localIterator = getConfiguredNetworks().iterator();
+		WifiConfiguration wifiConfiguration;
+		do {
+			if (!localIterator.hasNext())
+				return false;
+			wifiConfiguration = (WifiConfiguration) localIterator.next();
+		} while (!wifiConfiguration.SSID.equals("\"" + ssid + "\""));
+		return true;
+	}
+
+	/**
+	 * 在已经配置好的Wifi列表中移除某个SSID的wifi
+	 * 
+	 * @param SSID
+	 * 
+	 * @return 是否操作成功，ture操作成功，否则操作失败
+	 * */
+	public boolean removeConfiguredNetwork(String ssid) {
+		WifiConfiguration localWifiConfiguration = getSSIDWifiConfiguration(ssid);
+		if (localWifiConfiguration != null) {
+			boolean isSuccess = mWifiManager.removeNetwork(localWifiConfiguration.networkId);
+			return isSuccess;
+		}
+		return false;
+	}
+
+	/**
+	 * 在Wifi配置列表中获取某个SSID的Wifi配置信息
+	 * 
+	 * @param SSID
+	 * 
+	 * @return 存在则返回Wifi配置信息，否则返回null
+	 * */
+	public WifiConfiguration getSSIDWifiConfiguration(String ssid) {
+		Iterator localIterator = getConfiguredNetworks().iterator();
+		WifiConfiguration wifiConfiguration;
+		do {
+			if (!localIterator.hasNext())
+				return null;
+			wifiConfiguration = (WifiConfiguration) localIterator.next();
+		} while (!wifiConfiguration.SSID.equals("\"" + ssid + "\""));
+		return wifiConfiguration;
+	}
+
+	/**
+	 * 保存WIFI配置信息
+	 * */
+	public void saveConfiguration() {
+		this.mWifiManager.saveConfiguration();
+	}
+
+	/**
+	 * Wifi重连
+	 * */
+	public boolean reconnect() {
+		return this.mWifiManager.reconnect();
+	}
+
+	/**
+	 * Reconnect to the currently active access point, even if we are
+	 * already connected. This may result in the asynchronous delivery of
+	 * state change events.
+	 * 
+	 * @return true if the operation succeeded
+	 * */
+	public boolean reassociate() {
+		return this.mWifiManager.reassociate();
+	}
+
+	/**
+	 * 连接某个WIFI配置的网络
+	 * 
+	 * @param wifiConfiguration
+	 *                要连接的wifi的配置参数
+	 * @param disableOthers
+	 *                true 为禁用其他网络，用指定的参数连接特定的wifi
+	 * @return 是否操作成功
+	 * */
+	public boolean connectWifi(WifiConfiguration wifiConfiguration, boolean disableOthers) {
+		// 添加进入Wifi配置列表中，并返回id，实际保存的配置中id将不保存,添加失败则返回 -1
+		int networkId = this.mWifiManager.addNetwork(wifiConfiguration);
+		return connectWifi(networkId, disableOthers);
+	}
+
+	/**
+	 * 连接某个netId的网络
+	 * 
+	 * @param netId
+	 *                网络配置中的的网络列表ID
+	 * @param disableOthers
+	 *                true 为禁用其他网络，用指定的参数连接特定的wifi
+	 * @return {@code true} 如果操作成功
+	 * */
+	public boolean connectWifi(int netId, boolean disableOthers) {
+		boolean connect = false;
+		if (netId != -1) {
+			connect = this.mWifiManager.enableNetwork(netId, disableOthers);
+		} else {
+			return false;
+		}
+		if (connect) {
+			saveConfiguration();
+		}
+		return connect;
+	}
+
+	/**
+	 * 断开指定id的wifi
+	 * 
+	 * @param netId
+	 *                网络配置中的的网络列表ID
+	 * @return {@code true} 如果操作成功
+	 */
+	public boolean disconnectWifi(int netId) {
+		return this.mWifiManager.disableNetwork(netId);
+	}
+
+	/**
+	 * 获取Wi-Fi功能的状态。
+	 * 
+	 * @return One of {@link #WIFI_STATE_DISABLED},
+	 *         {@link #WIFI_STATE_DISABLING}, {@link #WIFI_STATE_ENABLED},
+	 *         {@link #WIFI_STATE_ENABLING}, {@link #WIFI_STATE_UNKNOWN}
+	 * @see #isWifiEnabled()
+	 */
+	public int getWifiState() {
+		return mWifiManager.getWifiState();
+	}
+
+	/**
+	 * 打开Wifi开关
+	 * 
+	 * @return {@code true} 如果操作成功,或者已经打开了Wifi
+	 * */
+	public boolean openWifi() {
+		if (!this.mWifiManager.isWifiEnabled()) {
+			return this.mWifiManager.setWifiEnabled(true);
+		} else {
+			return true;
+		}
+	}
+
+	/**
+	 * Disassociate from the currently active access point. This may result
+	 * in the asynchronous delivery of state change events.
+	 * 
+	 * @return true if the operation succeeded
+	 * */
+	public boolean disconnect() {
+		return mWifiManager.disconnect();
+	}
+
+	/**
+	 * Return whether Wi-Fi is enabled or disabled.
+	 * 
+	 * @return true if Wi-Fi is enabled
+	 * */
+	public boolean isWifiEnable() {
+		return mWifiManager.isWifiEnabled();
+	}
+
+	/**
+	 * 关闭Wifi开关
+	 * 
+	 * @return {@code true} 如果操作成功,或者已经关闭了Wifi
+	 * */
+	public boolean closeWifi() {
+		if (this.mWifiManager.isWifiEnabled()) {
+			return this.mWifiManager.setWifiEnabled(false);
+		} else {
+			return true;
+		}
+	}
+
+	/**
+	 * 获取Wifi扫描结果
+	 * 
+	 * @return Wifi 扫描结果
+	 */
+	public List<ScanResult> getScanResults() {
+		return this.mWifiManager.getScanResults();
+	}
+
+	/**
+	 * 开始扫描wifi
+	 */
+	public void startScan() {
+		this.mWifiManager.startScan();
+	}
+
+	/**
+	 * 获得Wifi锁
+	 * */
+	public void acquireWifiLock() {
+		this.mWifiLock.acquire();
+	}
+
+	/**
+	 * 创建Wifi锁
+	 * */
+	public void creatWifiLock() {
+		this.mWifiLock = this.mWifiManager.createWifiLock("wifi_lock");
+	}
+
+	/**
+	 * 释放Wifi锁
+	 * */
+	public void releaseWifiLock() {
+		if (this.mWifiLock.isHeld())
+			this.mWifiLock.acquire();
+	}
+
+	/**
+	 * 根据wifi热点配置创建一个Wifi热点
+	 * 
+	 * @param wifiConfiguration
+	 * 
+	 * @param paramBoolean
+	 * 
+	 * @throws InvocationTargetException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws NoSuchMethodException
+	 */
+	public void createWiFiAP(WifiConfiguration wifiConfiguration, boolean paramBoolean) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+		Class localClass = this.mWifiManager.getClass();
+		Class[] arrayOfClass = new Class[2];
+		arrayOfClass[0] = WifiConfiguration.class;
+		arrayOfClass[1] = Boolean.TYPE;
+		Method localMethod = localClass.getMethod("setWifiApEnabled", arrayOfClass);
+		Object[] arrayOfObject = new Object[2];
+		arrayOfObject[0] = wifiConfiguration;
+		arrayOfObject[1] = Boolean.valueOf(paramBoolean);
+		localMethod.invoke(mWifiManager, arrayOfObject);
+	}
+
+	/**
+	 * 根据指定wifi热点配置打开或者关闭热点; 双工的，则不用理会，wifi开关，单工的，则需要关闭Wifi
+	 * */
+	public boolean setWifiApEnabled(WifiConfiguration config, boolean enabled) {
+		try {
+			Method method = mWifiManager.getClass().getMethod("setWifiApEnabled", WifiConfiguration.class, boolean.class);
+			return (Boolean) method.invoke(mWifiManager, config, enabled);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	/**
+	 * 获取wifi热点状态
+	 * 
+	 * @return One of {@link #WIFI_AP_STATE_DISABLED},
+	 *         {@link #WIFI_AP_STATE_DISABLING},
+	 *         {@link #WIFI_AP_STATE_ENABLED},
+	 *         {@link #WIFI_AP_STATE_ENABLING},
+	 *         {@link #WIFI_AP_STATE_FAILED}
+	 */
+	public int getWifiApState() {
+		try {
+			Method method = mWifiManager.getClass().getMethod("getWifiApState");
+			return (Integer) method.invoke(mWifiManager);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return WIFI_AP_STATE_FAILED;
+		}
+	}
+
+	/**
+	 * 获取Wifi热点 AP 的配置信息
+	 * */
+	public WifiConfiguration getWifiApConfiguration() {
+		try {
+			Method method = mWifiManager.getClass().getMethod("getWifiApConfiguration");
+			return (WifiConfiguration) method.invoke(mWifiManager);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	/**
+	 * 设置Wifi热点 AP 的配置信息
+	 * 
+	 * @param config
+	 *                网络配置
+	 * */
+	public boolean setWifiApConfiguration(WifiConfiguration config) {
+		try {
+			Method method = mWifiManager.getClass().getMethod("setWifiApConfiguration", WifiConfiguration.class);
+			return (Boolean) method.invoke(mWifiManager, config);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	/***
+	 * 设置AP网络配置
+	 * 
+	 * @param config
+	 *                网络配置
+	 * */
+	public int setWifiApConfig(WifiConfiguration config) {
+		try {
+			Method method = mWifiManager.getClass().getMethod("setWifiApConfig", WifiConfiguration.class);
+			return (Integer) method.invoke(mWifiManager, config);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return WIFI_AP_STATE_FAILED;
+		}
+	}
+
+	/**
+	 * 创建一个wifi 配置
+	 * 
+	 * @param ssid
+	 *                名称
+	 * @param password
+	 *                密码
+	 * @param paramInt
+	 *                有3个参数，1是无密码，2是简单密码，3是wpa加密
+	 * @param paramType
+	 *                是"ap"还是"wifi"
+	 * @return WifiConfiguration
+	 */
+	public WifiConfiguration createWifiConfiguration(String ssid, String password, int paramInt, String paramType) {
+		WifiConfiguration wifiConfiguration = new WifiConfiguration();
+		wifiConfiguration.allowedAuthAlgorithms.clear();
+		wifiConfiguration.allowedGroupCiphers.clear();
+		wifiConfiguration.allowedKeyManagement.clear();
+		wifiConfiguration.allowedPairwiseCiphers.clear();
+		wifiConfiguration.allowedProtocols.clear();
+		if (paramType.equals("wifi")) {
+			wifiConfiguration.SSID = ("\"" + ssid + "\"");
+			removeConfiguredNetwork(ssid);// 尝试移除此SSID
+			if (paramInt == 1) {
+				wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+				wifiConfiguration.wepTxKeyIndex = 0;// 默认的WEP密钥索引，范围从0到3。
+			} else if (paramInt == 2) {
+				wifiConfiguration.hiddenSSID = true;
+				wifiConfiguration.wepKeys[0] = "\"" + password + "\"";
+				wifiConfiguration.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.SHARED);
+				wifiConfiguration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+				wifiConfiguration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+				wifiConfiguration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
+				wifiConfiguration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);
+				wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+				wifiConfiguration.wepTxKeyIndex = 0;
+			} else {
+				wifiConfiguration.preSharedKey = "\"" + password + "\"";
+				wifiConfiguration.hiddenSSID = true;
+				wifiConfiguration.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
+				wifiConfiguration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+				wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+				wifiConfiguration.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+				wifiConfiguration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+				wifiConfiguration.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+				wifiConfiguration.status = WifiConfiguration.Status.ENABLED;
+			}
+		} else {
+			wifiConfiguration.SSID = ssid;
+			wifiConfiguration.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.SHARED);
+			wifiConfiguration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+			wifiConfiguration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+			wifiConfiguration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
+			wifiConfiguration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);
+			wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+			wifiConfiguration.wepTxKeyIndex = 0;
+			if (paramInt == 1) {
+				wifiConfiguration.wepKeys[0] = "";
+				wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+				wifiConfiguration.wepTxKeyIndex = 0;
+			} else if (paramInt == 2) {
+				wifiConfiguration.hiddenSSID = true;
+				wifiConfiguration.wepKeys[0] = password;
+			} else if (paramInt == 3) {
+				wifiConfiguration.preSharedKey = password;
+				wifiConfiguration.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
+				wifiConfiguration.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+				wifiConfiguration.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+				wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+				wifiConfiguration.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+				wifiConfiguration.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+			}
+		}
+		return wifiConfiguration;
+	}
+
+	/**
+	 * 获取热点SSID
+	 * 
+	 * @return SSID
+	 */
+	public String getApSSID() {
+		try {
+			Method localMethod = this.mWifiManager.getClass().getDeclaredMethod("getWifiApConfiguration", new Class[0]);
+			if (localMethod == null)
+				return null;
+			Object localObject1 = localMethod.invoke(this.mWifiManager, new Object[0]);
+			if (localObject1 == null)
+				return null;
+			WifiConfiguration localWifiConfiguration = (WifiConfiguration) localObject1;
+			if (localWifiConfiguration.SSID != null)
+				return localWifiConfiguration.SSID;
+			Field localField1 = WifiConfiguration.class.getDeclaredField("mWifiApProfile");
+			if (localField1 == null)
+				return null;
+			localField1.setAccessible(true);
+			Object localObject2 = localField1.get(localWifiConfiguration);
+			localField1.setAccessible(false);
+			if (localObject2 == null)
+				return null;
+			Field localField2 = localObject2.getClass().getDeclaredField("SSID");
+			localField2.setAccessible(true);
+			Object localObject3 = localField2.get(localObject2);
+			if (localObject3 == null)
+				return null;
+			localField2.setAccessible(false);
+			String str = (String) localObject3;
+			return str;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	/**
+	 * Wi-Fi AP is currently being disabled. The state will change to
+	 * {@link #WIFI_AP_STATE_DISABLED} if it finishes successfully.
+	 * 
+	 * @see #WIFI_AP_STATE_CHANGED_ACTION
+	 * @see #getWifiApState()
+	 * 
+	 * @hide
+	 */
+	public static final int WIFI_AP_STATE_DISABLING = 0;
+	/**
+	 * Wi-Fi AP is disabled.
+	 * 
+	 * @see #WIFI_AP_STATE_CHANGED_ACTION
+	 * @see #getWifiState()
+	 * 
+	 * @hide
+	 */
+	public static final int WIFI_AP_STATE_DISABLED = 1;
+	/**
+	 * Wi-Fi AP is currently being enabled. The state will change to
+	 * {@link #WIFI_AP_STATE_ENABLED} if it finishes successfully.
+	 * 
+	 * @see #WIFI_AP_STATE_CHANGED_ACTION
+	 * @see #getWifiApState()
+	 * 
+	 * @hide
+	 */
+	public static final int WIFI_AP_STATE_ENABLING = 2;
+	/**
+	 * Wi-Fi AP is enabled.
+	 * 
+	 * @see #WIFI_AP_STATE_CHANGED_ACTION
+	 * @see #getWifiApState()
+	 * 
+	 * @hide
+	 */
+	public static final int WIFI_AP_STATE_ENABLED = 3;
+	/**
+	 * Wi-Fi AP is in a failed state. This state will occur when an error
+	 * occurs during enabling or disabling
+	 * 
+	 * @see #WIFI_AP_STATE_CHANGED_ACTION
+	 * @see #getWifiApState()
+	 * 
+	 * @hide
+	 */
+	public static final int WIFI_AP_STATE_FAILED = 4;
+
+}

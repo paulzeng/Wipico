@@ -1,0 +1,22 @@
+package com.chinasvc.wipico.type;
+
+public class Audio {
+	
+	/** 启动音乐播放器Action */
+	public static final String START_ACTION_AUDIO = "com.stream.musicplayer";
+
+	/** 音乐播放器操作广播接收Action */
+	public static final String BROADCAST_ACTION_AUDIO = "com.stream.cmdmusicplayer";
+
+
+	public static final int SERVER_CMD_MUSIC_ITME_SEEKBAR = 0x1101;
+	public static final int SERVER_CMD_MUSIC_ITME_OPEN = 0x1102;
+	public static final int SERVER_CMD_MUSIC_ITME_STOP = 0x1103;
+	public static final int SERVER_CMD_MUSIC_ITME_PAUSE = 0x1104;
+	public static final int SERVER_CMD_MUSIC_ITME_PLAY = 0x1105;
+	public static final int SERVER_CMD_MUSIC_ITME_MUTE = 0x1112;
+	public static final int SERVER_CMD_MUSIC_ITME_VOICE = 0x1113;
+	public static final int SERVER_CMD_MUSIC_ITME_VOICE_ADD = 0x1114;
+	public static final int SERVER_CMD_MUSIC_ITME_VOICE_DESC = 0x1115;
+
+}

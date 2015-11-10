@@ -1,0 +1,10 @@
+package com.chinasvc.wipico.bean;
+
+public class ImageFlag {
+	public static final int IMAGE_FLAG_ONSCALEEND = 0x01;// 缩放结束
+	public static final int IMAGE_FLAG_ONSCALE = 0x02;// 缩放
+	public static final int IMAGE_FLAG_ONSCROLL = 0x03;// 滑动
+	public static final int IMAGE_FLAG_ONDOUBLETAP = 0x04;// 双击
+	public static final int IMAGE_FLAG_ENLARGE = 0x05;// 放大
+	public static final int IMAGE_FLAG_NARROW = 0x06;// 缩小
+}

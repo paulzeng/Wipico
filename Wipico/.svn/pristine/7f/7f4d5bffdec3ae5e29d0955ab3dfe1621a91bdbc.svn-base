@@ -1,0 +1,90 @@
+package com.chinasvc.wipico.client;
+
+import com.chinasvc.wipico.bean.Device;
+import com.chinasvc.wipico.bean.ImageTransform;
+import com.chinasvc.wipico.type.Image;
+import com.chinasvc.wipico.util.WipicoConstant;
+
+/**
+ * 客户端图片操作请求类
+ * 
+ * @since 1.0.0
+ * */
+public class ImageHelper {
+
+	/**
+	 * 打开指定路径的图片
+	 * 
+	 * @param path
+	 *                路径名称
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public static void openImage(String path, Device device) {
+		ActionSender.sendMediaOperate(WipicoConstant.SERVER_CMD_IMAGE, Image.SERVER_CMD_IMAGE_ITEM_OPEN, path, device.getDeviceIp());
+	}
+
+	/**
+	 * 退出图片播放器
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * 
+	 * */
+	public static void stop(Device device) {
+		ActionSender.sendMediaOperate(WipicoConstant.SERVER_CMD_IMAGE, Image.SERVER_CMD_IMAGE_ITEM_STOP, 0, device.getDeviceIp());
+	}
+
+	/**
+	 * 左转
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public static void turnLeft(Device device) {
+		ActionSender.sendMediaOperate(WipicoConstant.SERVER_CMD_IMAGE, Image.SERVER_CMD_IMAGE_ITEM_TURN_LEFT, 0, device.getDeviceIp());
+	}
+
+	/**
+	 * 右转
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public static void turnRight(Device device) {
+		ActionSender.sendMediaOperate(WipicoConstant.SERVER_CMD_IMAGE, Image.SERVER_CMD_IMAGE_ITEM_TURN_RIGHT, 0, device.getDeviceIp());
+	}
+
+	/**
+	 * 放大
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public static void zoomIn(Device device) {
+		ActionSender.sendMediaOperate(WipicoConstant.SERVER_CMD_IMAGE, Image.SERVER_CMD_IMAGE_ITEM_ZOOM_IN, 0, device.getDeviceIp());
+	}
+
+	/**
+	 * 缩小
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * */
+	public static void zoomOut(Device device) {
+		ActionSender.sendMediaOperate(WipicoConstant.SERVER_CMD_IMAGE, Image.SERVER_CMD_IMAGE_ITEM_ZOOM_OUT, 0, device.getDeviceIp());
+	}
+
+	/**
+	 * 变换
+	 * 
+	 * @param device
+	 *                所连接的设备
+	 * @param imageTransform
+	 *                变换类
+	 * */
+	public static void transform(Device device, ImageTransform imageTransform) {
+		ActionSender.sendImageTransform(WipicoConstant.SERVER_CMD_IMAGE, Image.SERVER_CMD_IMAGE_ITEM_CHANGE, imageTransform, device.getDeviceIp());
+	}
+
+}

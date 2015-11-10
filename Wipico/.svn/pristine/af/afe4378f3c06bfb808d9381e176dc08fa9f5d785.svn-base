@@ -1,0 +1,63 @@
+package com.chinasvc.wipico.util;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+import android.content.Context;
+
+/**
+ * 文件操作类
+ * 
+ * @since 1.0.0
+ * */
+public class FileUtil {
+
+	private Context mContext;
+
+	/** 类的实例化 */
+	private static FileUtil instance;
+
+	/**
+	 * 构造 FileUtil实例化对象
+	 * */
+	public FileUtil(Context context) {
+		mContext = context;
+	}
+
+	/**
+	 * 返回当前类的实例化对象
+	 * 
+	 * @param context
+	 * */
+	public static FileUtil getInstance(Context context) {
+		if (instance == null) {
+			instance = new FileUtil(context);
+		}
+		return instance;
+	}
+
+	/**
+	 * 拷贝项目资源文件到目标路径文件中
+	 * 
+	 * @param resourceId
+	 *                项目资源文件
+	 * 
+	 * @param targetFile
+	 *                目标文件
+	 * 
+	 * @exception IOException
+	 * */
+	public void copyResourceFile(int resourceId, String targetFile) throws IOException {
+		InputStream fin = mContext.getResources().openRawResource(resourceId);
+		FileOutputStream fos = new FileOutputStream(targetFile);
+		int length;
+		byte[] buffer = new byte[1024 * 32];
+		while ((length = fin.read(buffer)) != -1) {
+			fos.write(buffer, 0, length);
+		}
+		fin.close();
+		fos.close();
+	}
+
+}

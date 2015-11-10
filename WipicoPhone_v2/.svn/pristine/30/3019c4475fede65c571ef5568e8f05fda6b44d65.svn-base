@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Wipico</string>
+
+    <!-- Nav -->
+    <string name="nav_media">影音</string>
+    <string name="nav_image">图片</string>
+    <string name="nav_office">商务</string>
+    <string name="nav_app">应用</string>
+    <string name="nav_control">控制</string>
+
+    <!-- Activity Title -->
+    <string name="actionbar_title_mouse">鼠标</string>
+    <string name="actionbar_title_touch">触摸板</string>
+    <string name="actionbar_title_control">遥控器</string>
+    <string name="actionbar_title_keyboard">键盘</string>
+    <string name="actionbar_title_history">历史记录</string>
+    <string name="actionbar_title_settings">设置</string>
+    <string name="actionbar_title_my_phone">我的手机</string>
+    <string name="actionbar_title_my_device">我的投影</string>
+    <string name="actionbar_title_audio">音乐</string>
+    <string name="actionbar_title_video">电影</string>
+    <string name="actionbar_title_gallery">照片图库</string>
+    <string name="actionbar_title_camera">相机胶卷</string>
+    <string name="actionbar_title_application">应用</string>
+    <string name="actionbar_title_office_control">Office控制器</string>
+    <string name="actionbar_title_about">关于</string>
+    <string name="actionbar_title_video_control">视频控制器</string>
+    <string name="actionbar_title_audio_control">音乐播放器</string>
+    <string name="actionbar_title_image_control">图片控制器</string>
+    <string name="actionbar_title_image_control_default">我的图片</string>
+    <string name="actionbar_title_video_control_default">我的视频</string>
+    <string name="actionbar_title_audio_control_default">我的音乐</string>
+    <!-- Dialog -->
+    <string name="dialog_title_connect">选择设备</string>
+    <string name="dialog_title_verification">请输入验证码</string>
+    <string name="dialog_title_note">提示</string>
+    <string name="dialog_title_property">属性</string>
+    <string name="dialog_msg_clear_history">是否清空历史记录？</string>
+    <string name="dialog_msg_disconnect">是否断开</string>
+    <string name="dialog_msg_receive">接收：</string>
+    <string name="dialog_msg_name">名称：</string>
+    <string name="dialog_msg_size">大小：</string>
+    <string name="dialog_msg_position">位置：</string>
+    <string name="dialog_msg_send">发送：</string>
+    <string name="dialog_msg_time">时间：</string>
+    <string name="dialog_msg_verification_error">验证码错误</string>
+
+    <!-- Button -->
+    <string name="btn_cancel">取消</string>
+    <string name="btn_share">分享</string>
+    <string name="btn_share_phone">分享到手机</string>
+    <string name="btn_confirm">确定</string>
+    <string name="btn_again">再次发送</string>
+
+    <!-- Audio -->
+    <string name="audio_msg_no_prev">无上一首歌曲</string>
+    <string name="audio_msg_no_next">无下一首歌曲</string>
+    <!--  -->
+    <string name="history_receive_from">接收自</string>
+    <string name="history_send_to">发送给</string>
+    <string name="history_waiting_to_receive_files">等待接收文件</string>
+    <string name="history_waiting_to_send_the_file">等待发送文件</string>
+    <string name="history_receive_fail">接收失败</string>
+    <string name="history_send_fail">发送失败</string>
+
+    <!-- Video -->
+    <string name="video_size">大小：</string>
+    <string name="video_duration">时长：</string>
+
+    <!-- Office -->
+    <string name="office_summary">本地Office文件（下拉刷新）</string>
+    <string name="office_control_prev">上一页</string>
+    <string name="office_control_next">下一页</string>
+
+    <!--  -->
+    <string name="pop_local_play">本地播放</string>
+    <string name="pop_remote_play">推送播放</string>
+    <string name="pop_share">分享</string>
+    <string name="pop_delete">删除</string>
+    <string name="pop_cancel">取消</string>
+    <string name="pop_property">属性</string>
+    <string name="pop_remote">投影仪</string>
+    <string name="pop_play">播放</string>
+    <string name="pop_multi">多选</string>
+
+    <!-- Keyboard -->
+    <string name="keyboard_submit">提交</string>
+    <string name="keyboard_clear">清空</string>
+
+    <!-- Message -->
+    <string name="msg_no_device">未连接设备</string>
+    <string name="msg_no_history">无历史记录</string>
+    <string name="msg_no_this_file">文件不存在</string>
+    <string name="msg_no_share">未找到可分享的用户</string>
+    <string name="msg_no_ftp">未连接设备,请检查设备的连通性</string>
+    <string name="msg_no_sdcard">无存储盘</string>
+    <string name="msg_no_music">无音乐文件</string>
+    <string name="msg_no_image">无图片文件</string>
+    <string name="msg_no_video">无视频文件</string>
+    <string name="msg_no_scan_device">暂未扫描到设备</string>
+    <string name="msg_no_net">无可用网络</string>
+    <string name="msg_exit">再按一次退出</string>
+    <string name="msg_data_error">数据异常</string>
+    <string name="msg_insufficient_storage_space_in">存储空间不足</string>
+    <string name="msg_scanning_video">正在扫描视频文件</string>
+
+    <!--  -->
+    <string name="ab_office">offcie办公</string>
+    <string name="ab_file">文件管理</string>
+    <string name="nav_uplaod">上传</string>
+    <string name="nav_download">下载</string>
+    <string name="nav_ok">完成</string>
+    <string name="nav_cancel">取消</string>
+    <string name="text_root_path">根目录</string>
+    <string name="text_sdcard">本地盘</string>
+    <string name="text_tf">TF卡</string>
+    <string name="text_U">U盘</string>
+    <string name="text_local_office">本地Office文件（下拉刷新）</string>
+    <string name="msg_file_select_fold">"请选择目录"</string>
+    <string name="msg_no_tf_file">"没有TF卡"</string>
+    <string name="msg_no_sd_file">没有本地存储</string>
+    <string name="msg_no_u_file">"没有U盘"</string>
+    <string name="msg_no_office_local">没有文件,请下拉刷新…</string>
+    <string name="msg_no_file">没有文件</string>
+    <string name="msg_no_ftp">请开启无线投影</string>
+    <string name="no_office_file">文件不存在,请刷新...</string>
+    <string name="msg_no_device_user">无可用设备</string>
+
+    <!-- Office -->
+    <string name="file_sdcard_name">投影 - 存储盘</string>
+    <string name="file_tf_name">投影 - TF 卡</string>
+    <string name="file_usb_name">投影 - U 盘</string>
+
+    <!-- application -->
+    <string name="application_summary_video_online">在线视频</string>
+    <string name="application_summary_game">游戏</string>
+    <string name="application_video_youku">优酷视频</string>
+    <string name="application_video_sohu">搜狐视频</string>
+    <string name="application_video_qiyi">奇艺</string>
+    <string name="application_video_tx">腾讯视频</string>
+    <string name="application_video_pptv">PPTV</string>
+    <string name="application_video_pps">PPS网络电视</string>
+    <string name="application_video_letv">乐视</string>
+    <string name="application_item_start">启动</string>
+    <string name="application_item_download">下载</string>
+
+    <!-- Setting -->
+    <string name="setting_summary_device">设备连接</string>
+    <string name="setting_summary_function">声音与振动</string>
+    <string name="setting_summary_other">其他</string>
+    <string name="setting_item_connect">连接设备</string>
+    <string name="setting_item_disconnect">断开连接</string>
+    <string name="setting_item_wlan">WLAN</string>
+    <string name="setting_item_device_wlan">设置投影Wi-Fi</string>
+    <string name="setting_item_voice">按键声音</string>
+    <string name="setting_item_vibration">按键振动</string>
+    <string name="setting_item_help">帮助</string>
+    <string name="setting_item_about">关于</string>
+
+    <!-- About -->
+    <string name="setting_about_bottom">"深圳展景世纪科技有限公司\nCopyright © 2013 chinasvc.com All Rights Reserved. "</string>
+    <string name="setting_about_version_type">Android</string>
+    <string name="setting_about_code">扫描二维码，您的朋友也可下载Wipico客户端</string>
+    <string name="setting_about_version">Version</string>
+    <string name="setting_about_company_web_laber">"展景世纪："</string>
+    <string name="setting_about_company_web">"http://www.chinasvc.com/"</string>
+
+    <!-- Just use standard Pull Down String when pulling up. These can be set for languages which require it -->
+    <string name="pull_to_refresh_from_bottom_pull_label">@string/pull_to_refresh_pull_label</string>
+    <string name="pull_to_refresh_from_bottom_release_label">@string/pull_to_refresh_release_label</string>
+    <string name="pull_to_refresh_from_bottom_refreshing_label">@string/pull_to_refresh_refreshing_label</string>
+    <string name="pull_to_refresh_pull_label">下拉刷新…</string>
+    <string name="pull_to_refresh_release_label">放开以刷新…</string>
+    <string name="pull_to_refresh_refreshing_label">正在载入…</string>
+
+    <!-- player -->
+    <string name="VideoView_error_button">OK</string>
+    <string name="VideoView_error_title">Cannot play video</string>
+    <string name="VideoView_error_text_unknown">Sorry, this video cannot be played.</string>
+    <string name="VideoView_error_text_invalid_progressive_playback">Sorry, this video is not valid for streaming to
+        this device.</string>
+
+</resources>

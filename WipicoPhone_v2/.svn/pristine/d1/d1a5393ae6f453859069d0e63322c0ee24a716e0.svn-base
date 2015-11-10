@@ -1,0 +1,332 @@
+package com.chinasvc.wipicophone;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.chinasvc.wipico.bean.FileInfo;
+import com.chinasvc.wipicophone.adapter.FileListViewAdapter;
+import com.chinasvc.wipicophone.adapter.PopMenuAdapter;
+import com.chinasvc.wipicophone.async.AsyncCallBack.UploadCallBack;
+import com.chinasvc.wipicophone.async.OfficeUploadAsyncTask;
+import com.chinasvc.wipicophone.bean.PopMenu;
+import com.chinasvc.wipicophone.bean.PopMenu.PopType;
+import com.chinasvc.wipicophone.db.OfficeLocalDao;
+import com.chinasvc.wipicophone.dialog.LoadingDialog;
+import com.chinasvc.wipicophone.util.DensityUtil;
+import com.chinasvc.wipicophone.util.FileTools;
+import com.chinasvc.wipicophone.util.FileUtil;
+import com.chinasvc.wipicophone.widget.ptr.PullToRefreshBase;
+import com.chinasvc.wipicophone.widget.ptr.PullToRefreshBase.OnRefreshListener;
+import com.chinasvc.wipicophone.widget.ptr.PullToRefreshListView;
+
+import android.content.Context;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
+
+public class LocalOfficeActivity extends ControlBaseActivity implements OnItemClickListener, UploadCallBack {
+
+	private PullToRefreshListView mListView;
+	private FileListViewAdapter mFileListViewAdapter;
+
+	private List<FileInfo> listDatas = new ArrayList<FileInfo>();
+
+	private OfficeLocalDao localDao;
+
+	private boolean isLoading = false;
+	private List<String> sdPaths = FileUtil.getSDCardPath();
+
+	private View main_layout;
+
+	protected void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_local_file_list);
+		initThreadHandler();
+
+		localDao = new OfficeLocalDao();
+		listDatas = localDao.fetchOffice();
+		initView();
+
+		setPopDatas();
+
+		setView();
+	}
+
+	private void initView() {
+		main_layout = findViewById(R.id.main_layout);
+
+		mListView = (PullToRefreshListView) findViewById(R.id.fileListView);
+		mListView.setOnRefreshListener(new OnRefreshListener<ListView>() {
+			@Override
+			public void onRefresh(PullToRefreshBase<ListView> refreshView) {
+				if (!isLoading) {
+					new GetLocalDataTask().execute();
+				}
+			}
+		});
+		mFileListViewAdapter = new FileListViewAdapter(this, listDatas);
+		mListView.setAdapter(mFileListViewAdapter);
+		mListView.setOnItemClickListener(this);
+	}
+
+	private void setView() {
+		if (listDatas.size() <= 0) {
+			if (!FileUtil.isExternalStorageAvailable()) {
+				FileInfo empty = new FileInfo();
+				empty.setAlbumId(1);
+				empty.setName(getString(R.string.msg_no_sdcard));
+				listDatas.add(empty);
+				mFileListViewAdapter.notifyDataSetChanged();
+			} else {
+				FileInfo empty = new FileInfo();
+				empty.setAlbumId(1);
+				empty.setName(getString(R.string.msg_no_this_file));
+				listDatas.add(empty);
+				mFileListViewAdapter.notifyDataSetChanged();
+			}
+		}
+	}
+
+	private class GetLocalDataTask extends AsyncTask<Void, Void, Void> {
+		private List<FileInfo> listTemps = new ArrayList<FileInfo>();
+
+		@Override
+		protected void onPreExecute() {
+			// TODO Auto-generated method stub
+			isLoading = true;
+			listDatas.clear();
+			listTemps.clear();
+			super.onPreExecute();
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			if (!FileUtil.isExternalStorageAvailable()) {
+				listDatas.clear();
+			} else {
+				for (String sd : sdPaths) {
+					scanSDOffice(new File(sd), listTemps);
+				}
+				localDao.deleteAll();
+				localDao.addAll(listTemps);// 添加进入数据库
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			// TODO Auto-generated method stub
+			listDatas.clear();
+			listDatas.addAll(listTemps);
+			mFileListViewAdapter.notifyDataSetChanged();
+			mListView.onRefreshComplete();
+			isLoading = false;
+
+			setView();
+			super.onPostExecute(result);
+		}
+	}
+
+	private final String DEVICE_FTP_REMOTE_OFFICE_FILE = "/sdcard/Office";
+
+	/**
+	 * 获取Office文件
+	 */
+	public static void scanSDOffice(File file, List<FileInfo> list) {
+		if (file.isDirectory()) {
+			File[] files = file.listFiles();
+			if (files != null) {
+				for (int i = 0; i < files.length; i++) {
+					File tmp = files[i];
+					if (tmp.isFile()) {
+						String fileName = tmp.getName();
+						String filePath = tmp.getName();
+						long size = tmp.length();
+						if (fileName.indexOf(".") >= 0) {
+							fileName = fileName.substring(fileName.lastIndexOf(".") + 1);
+							if (FileUtil.isOfficeFile(fileName)) {
+								FileInfo info = new FileInfo();
+								info.setName(filePath);
+								info.setPath(tmp.getAbsolutePath());
+								info.setSize(size);
+								list.add(info);
+							}
+						}
+					} else {
+						scanSDOffice(tmp, list);
+					}
+				}
+			}
+		} else {
+			if (file.isFile()) {
+				String fileName = file.getName();
+				String filePath = file.getName();
+				if (fileName.indexOf(".") >= 0) {
+					fileName = fileName.substring(fileName.lastIndexOf(".") + 1);
+					if (FileUtil.isOfficeFile(fileName)) {
+						FileInfo info = new FileInfo();
+						info.setName(filePath);
+						info.setPath(file.getAbsolutePath());
+						info.setSize(file.length());
+						list.add(info);
+					}
+				}
+			}
+		}
+	}
+
+	private int mPosition;
+
+	@Override
+	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+		// TODO Auto-generated method stub
+		if (listDatas.get(arg2 - 1).getAlbumId() != 1) {
+			mPosition = arg2;
+			int[] location = new int[2];
+			arg1.getLocationInWindow(location);
+			showPop(location[1], arg1.getHeight());
+		}
+	}
+
+	private void myToast(String str) {
+		Toast.makeText(this, str, Toast.LENGTH_SHORT).show();
+	}
+
+	private LoadingDialog loadingDialog;
+
+	@Override
+	public void preUploadView() {
+		// TODO Auto-generated method stub
+		if (loadingDialog != null) {
+			loadingDialog.show();
+		} else {
+			loadingDialog = new LoadingDialog(getParent());
+			loadingDialog.show();
+		}
+	}
+
+	@Override
+	public void startUploadData() {
+		// TODO Auto-generated method stub
+	}
+
+	private final String DEVICE_REMOTE_OFFICE_FILE = "/mnt/sdcard/Office";
+
+	@Override
+	public void completeUploadView(String name) {
+		loadingDialog.dismiss();
+		mThreadHandler.obtainMessage(PLAY_OFFICE, DEVICE_REMOTE_OFFICE_FILE + File.separator + name).sendToTarget();
+
+		((MainActivity) ((OfficeTabActivity) getParent()).getParent()).mTabHost.setCurrentTabByTag(MainActivity.TAB_OFFICE_CONTROL);
+	}
+
+	private View popupView;
+	private PopupWindow pop;
+	private ListView popListView;
+	private View main_pop;
+
+	private List<PopMenu> listPopDatas = new ArrayList<PopMenu>();
+
+	private void setPopDatas() {
+		listPopDatas = new ArrayList<PopMenu>();
+		listPopDatas.clear();
+		listPopDatas.add(new PopMenu(PopType.LOCAL_PLAY, getString(R.string.pop_local_play)));
+		listPopDatas.add(new PopMenu(PopType.REMOTE_PLAY, getString(R.string.pop_remote_play)));
+		// listPopDatas.add(new PopMenu(PopType.MULTI, "多选"));
+		listPopDatas.add(new PopMenu(PopType.SHARE, getString(R.string.pop_share)));
+	}
+
+	private void showPop(int y, int height) {
+		LayoutInflater mLayoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		popupView = mLayoutInflater.inflate(R.layout.pop_list_menu, null);
+		popListView = (ListView) popupView.findViewById(R.id.mListView);
+		main_pop = popupView.findViewById(R.id.main_pop);
+		popListView.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View view, int position, long id) {
+				pop.dismiss();
+				FileInfo bean = listDatas.get(mPosition - 1);
+				if (listPopDatas.get(position).getType() == PopType.LOCAL_PLAY) {
+					FileTools.openFile(bean.getPath(), LocalOfficeActivity.this);
+				} else if (listPopDatas.get(position).getType() == PopType.REMOTE_PLAY) {
+					if (MainActivity.mDevice != null) {
+						if (!isLoading) {
+							if (MainActivity.mWipicoFileClient != null) {
+								if (FileUtil.isFileExist(bean.getPath())) {
+									// 直接传送
+									new OfficeUploadAsyncTask(LocalOfficeActivity.this, DEVICE_FTP_REMOTE_OFFICE_FILE, bean, MainActivity.mWipicoFileClient)
+											.execute((Void[]) null);
+								} else {
+									// 文件不存在
+									myToast(getString(R.string.no_office_file));
+								}
+							} else {
+								if (MainActivity.mDevice == null) {
+									myToast(getString(R.string.msg_no_device_user));
+								} else if (MainActivity.mWipicoFileClient != null) {
+									myToast(getString(R.string.msg_no_ftp));
+								}
+							}
+						}
+					} else {
+						Toast.makeText(LocalOfficeActivity.this, R.string.msg_no_device, Toast.LENGTH_SHORT).show();
+					}
+				} else if (listPopDatas.get(position).getType() == PopType.SHARE) {
+					if (((OfficeTabActivity) getParent()).mainActivity.users.size() > 0 || MainActivity.mDevice != null) {
+						List<FileInfo> listShares = new ArrayList<FileInfo>();
+						FileInfo file = new FileInfo();
+						file.setPath(bean.getPath());
+						file.setName(bean.getName());
+						file.setSize(bean.getSize());
+						listShares.add(file);
+						((OfficeTabActivity) getParent()).mainActivity.showShareView(listShares, 0);
+					} else {
+						Toast.makeText(LocalOfficeActivity.this, R.string.msg_no_share, Toast.LENGTH_SHORT).show();
+					}
+
+				} else if (listPopDatas.get(position).getType() == PopType.MULTI) {
+
+				}
+			}
+		});
+		popListView.setAdapter(new PopMenuAdapter(this, listPopDatas));
+		pop = new PopupWindow(popupView, getResources().getDimensionPixelSize(R.dimen.gridview_column_3_width), LayoutParams.WRAP_CONTENT);
+		pop.setFocusable(true);
+		pop.update();
+		pop.setOutsideTouchable(true);
+		pop.setAnimationStyle(R.style.PopupAnimation);
+		pop.setBackgroundDrawable(new BitmapDrawable());
+
+		pop.showAtLocation(main_layout, Gravity.TOP, 0, correctPopPosition(y, height));
+	}
+
+	private int correctPopPosition(int y, int height) {
+		int offsetY;
+		int popHeight = listPopDatas.size() * getResources().getDimensionPixelSize(R.dimen.pop_item_height) + DensityUtil.dip2px(this, 9);
+		if ((y + height / 2 + popHeight) > (DensityUtil.getScreenHeight(this) - getResources().getDimensionPixelSize(R.dimen.footbar_height))) {
+			main_pop.setBackgroundResource(R.drawable.pop_bg_list_up);
+			offsetY = (y + height / 2) - popHeight;
+		} else {
+			main_pop.setBackgroundResource(R.drawable.pop_bg_list_down);
+			offsetY = y + height / 2;
+		}
+		return offsetY;
+	}
+
+	@Override
+	public void onBackPressed() {
+		this.getParent().onBackPressed();
+	}
+
+}

@@ -1,0 +1,133 @@
+package com.chinasvc.wipico.bean;
+
+/**
+ * 设备类
+ * */
+public class Device {
+
+	/** 设备名称 */
+	private String deviceName;
+
+	/** 设备的Ip */
+	private String deviceIp;
+
+	/** 设备的加密方式，用于Wipico2.0Wifi设备的连接 */
+	private String capabilities;
+
+	/**
+	 * 构造方法
+	 * */
+	public Device() {
+	}
+
+	/**
+	 * 构造方法
+	 * 
+	 * @param deviceName
+	 *                设备名称
+	 * */
+	public Device(String deviceName) {
+		this.deviceName = deviceName;
+	}
+
+	/**
+	 * 构造方法
+	 * 
+	 * @param deviceName
+	 *                设备名称
+	 * @param deviceIp
+	 *                设备ip
+	 * */
+	public Device(String deviceName, String deviceIp) {
+		this.deviceName = deviceName;
+		this.deviceIp = deviceIp;
+	}
+
+	/**
+	 * 构造方法
+	 * 
+	 * @param deviceName
+	 *                设备名称
+	 * @param capabilities
+	 *                加密方式
+	 * @param deviceIp
+	 *                设备ip
+	 * */
+	public Device(String ssid, String capabilities, String deviceIp) {
+		this.deviceName = ssid;
+		this.capabilities = capabilities;
+	}
+
+	/**
+	 * 获取加密方式
+	 * */
+	public String getCapabilities() {
+		return capabilities;
+	}
+
+	/**
+	 * 设置加密方式
+	 * */
+	public void setCapabilities(String capabilities) {
+		this.capabilities = capabilities;
+	}
+
+	/**
+	 * 获取设备名称
+	 * */
+	public String getDeviceName() {
+		return deviceName;
+	}
+
+	/**
+	 * 设置设备名称
+	 * */
+	public void setDeviceName(String deviceName) {
+		this.deviceName = deviceName;
+	}
+
+	/**
+	 * 获取设备ip
+	 * */
+	public String getDeviceIp() {
+		return deviceIp;
+	}
+
+	/**
+	 * 设置设备ip
+	 * */
+	public void setDeviceIp(String deviceIp) {
+		this.deviceIp = deviceIp;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((deviceName == null) ? 0 : deviceName.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Device other = (Device) obj;
+		if (deviceName == null) {
+			if (other.deviceName != null)
+				return false;
+		} else if (!deviceName.equals(other.deviceName))
+			return false;
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "Device [deviceName=" + deviceName + ", deviceIp=" + deviceIp + ", capabilities=" + capabilities + "]";
+	}
+
+}

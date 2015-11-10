@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res/com.chinasvc.wipicophone"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_activity"
+    android:orientation="vertical" >
+
+    <include layout="@layout/layout_actionbar_scan" />
+
+    <com.chinasvc.wipicophone.widget.NestScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="none" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+
+            <FrameLayout
+                android:id="@+id/framelayout"
+                android:layout_width="fill_parent"
+                android:layout_height="150dip"
+                android:background="#ffffff" >
+
+                <com.chinasvc.wipicophone.widget.ViewFlow
+                    android:id="@+id/viewflow"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" >
+                </com.chinasvc.wipicophone.widget.ViewFlow>
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:background="#00888888"
+                    android:gravity="right" >
+
+                    <com.chinasvc.wipicophone.widget.CircleFlowIndicator
+                        android:id="@+id/viewflowindic"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal|bottom"
+                        android:layout_marginRight="9dip"
+                        android:paddingBottom="6dip"
+                        android:paddingLeft="2dip"
+                        android:paddingRight="1dip"
+                        android:paddingTop="6dip"
+                        app:activeColor="#ffb5b5b5"
+                        app:activeType="fill"
+                        app:circleSeparation="15dip"
+                        app:inactiveColor="#ffb5b5b5"
+                        app:inactiveType="stroke"
+                        app:radius="4dip" />
+                </LinearLayout>
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dip"
+                android:layout_marginRight="8dip"
+                android:layout_marginTop="12dip"
+                android:gravity="center_vertical"
+                android:orientation="horizontal" >
+
+                <ImageView
+                    android:layout_width="5dip"
+                    android:layout_height="21dip"
+                    android:background="#ff3e9fec" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="4dip"
+                        android:text="@string/application_summary_video_online"
+                        android:textColor="@android:color/black"
+                        android:textSize="16sp" />
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="1dip"
+                        android:layout_gravity="bottom"
+                        android:layout_marginLeft="4dip"
+                        android:background="@drawable/list_divider_line_horizontal" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <com.chinasvc.wipicophone.widget.ScrollGridView
+                android:id="@+id/mVideoGridView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:horizontalSpacing="6dp"
+                android:listSelector="@android:color/transparent"
+                android:numColumns="3"
+                android:padding="8dip"
+                android:scrollbars="none"
+                android:verticalSpacing="8dp"
+                android:visibility="visible" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dip"
+                android:layout_marginRight="8dip"
+                android:layout_marginTop="12dip"
+                android:gravity="center_vertical"
+                android:orientation="horizontal" >
+
+                <ImageView
+                    android:layout_width="5dip"
+                    android:layout_height="21dip"
+                    android:background="#ff3e9fec" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="4dip"
+                        android:text="@string/application_summary_game"
+                        android:textColor="@android:color/black"
+                        android:textSize="16sp" />
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="1dip"
+                        android:layout_gravity="bottom"
+                        android:layout_marginLeft="4dip"
+                        android:background="@drawable/list_divider_line_horizontal" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <com.chinasvc.wipicophone.widget.ScrollGridView
+                android:id="@+id/mGameGridView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:horizontalSpacing="6dp"
+                android:listSelector="@android:color/transparent"
+                android:numColumns="3"
+                android:padding="8dip"
+                android:scrollbars="none"
+                android:verticalSpacing="8dp"
+                android:visibility="visible" />
+        </LinearLayout>
+    </com.chinasvc.wipicophone.widget.NestScrollView>
+
+</LinearLayout>

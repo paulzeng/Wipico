@@ -1,0 +1,158 @@
+package com.chinasvc.wipicophone;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.ImageView;
+import android.widget.TabHost;
+import android.widget.TabHost.OnTabChangeListener;
+import android.widget.Toast;
+
+import com.chinasvc.wipicophone.config.BroadcastConfig;
+
+public class MediaTabActivity extends BaseTabActivity implements OnClickListener {
+
+	private String TAG = "MediaTabActivity";
+	private TabHost mTabHost;
+	private Intent mPhoneIntent, mDeviceIntent;
+
+	private View ab_left, ab_right;
+
+	public MainActivity mainActivity;
+
+	private ImageView actionbar_scan, actionbar_state;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_media_tab);
+		registerReceiver();
+
+		mainActivity = (MainActivity) getParent();
+
+		initView();
+		addTab();
+
+		mTabHost.setOnTabChangedListener(new OnTabChangeListener() {
+			@Override
+			public void onTabChanged(String tabId) {
+				mainActivity.hideShareView();
+			}
+		});
+	}
+
+	private void initView() {
+		mPhoneIntent = new Intent(this, LocalMediaActivity.class);
+		mDeviceIntent = new Intent(this, RemoteMediaActivity.class);
+
+		actionbar_scan = (ImageView) findViewById(R.id.actionbar_scan);
+		actionbar_scan.setOnClickListener(this);
+		actionbar_state = (ImageView) findViewById(R.id.actionbar_state);
+
+		ab_left = findViewById(R.id.ab_left);
+		ab_right = findViewById(R.id.ab_right);
+		ab_left.setOnClickListener(this);
+		ab_right.setOnClickListener(this);
+	}
+
+	private final String TAB_MEDIA_PHONE = "media_phone";
+	private final String TAB_MEDIA_DEVICE = "media_device";
+
+	@SuppressWarnings("deprecation")
+	private void addTab() {
+		this.mTabHost = getTabHost();
+		TabHost localTabHost = this.mTabHost;
+		localTabHost.addTab(buildTabSpec(TAB_MEDIA_PHONE, TAB_MEDIA_PHONE, R.drawable.ic_launcher, this.mPhoneIntent));
+		localTabHost.addTab(buildTabSpec(TAB_MEDIA_DEVICE, TAB_MEDIA_DEVICE, R.drawable.ic_launcher, this.mDeviceIntent));
+	}
+
+	private TabHost.TabSpec buildTabSpec(String tag, String resLabel, int resIcon, final Intent content) {
+		return this.mTabHost.newTabSpec(tag).setIndicator(resLabel, getResources().getDrawable(resIcon)).setContent(content);
+	}
+
+	@Override
+	public void onClick(View v) {
+		// TODO Auto-generated method stub
+		if (v == ab_left) {
+			ab_left.setSelected(true);
+			ab_right.setSelected(false);
+			this.mTabHost.setCurrentTabByTag(TAB_MEDIA_PHONE);
+		} else if (v == ab_right) {
+			if (MainActivity.mDevice != null) {
+				if (MainActivity.mWipicoFileClient != null) {
+					ab_left.setSelected(false);
+					ab_right.setSelected(true);
+					this.mTabHost.setCurrentTabByTag(TAB_MEDIA_DEVICE);
+				} else {
+					Toast.makeText(this, R.string.msg_no_ftp, Toast.LENGTH_SHORT).show();
+				}
+			} else {
+				Toast.makeText(this, R.string.msg_no_device, Toast.LENGTH_SHORT).show();
+			}
+		} else if (v == actionbar_scan) {
+			Intent intent = new Intent();
+			intent.setAction(BroadcastConfig.BROADCAST_DEVICE_CONNECTING);
+			sendBroadcast(intent);
+		}
+	}
+
+	/** 注册广播 */
+	private void registerReceiver() {
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(BroadcastConfig.ACTION_DEVICE_CONNECTED);
+		filter.addAction(BroadcastConfig.ACTION_DEVICE_DISCONNECTED);
+		registerReceiver(broadcastReceiver, filter);
+	}
+
+	/** 注销广播 */
+	private void unregisterReceiver() {
+		unregisterReceiver(broadcastReceiver);
+	}
+
+	@Override
+	protected void onResume() {
+		this.mTabHost.setCurrentTabByTag(TAB_MEDIA_PHONE);
+		ab_left.setSelected(true);
+		ab_right.setSelected(false);
+
+		if (MainActivity.mDevice != null) {
+			actionbar_state.setImageResource(R.drawable.ic_ab_scan_connected);
+		} else {
+			actionbar_state.setImageResource(R.drawable.ic_ab_scan_disconnected);
+		}
+		super.onResume();
+	}
+
+	private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (intent.getAction() == BroadcastConfig.ACTION_DEVICE_CONNECTED) {
+				Log.i(TAG, "连接上设备的广播>>>>>>>");
+				actionbar_state.setImageResource(R.drawable.ic_ab_scan_connected);
+			} else if (intent.getAction() == BroadcastConfig.ACTION_DEVICE_DISCONNECTED) {
+				Log.e(TAG, "断开了设备的广播>>>>>>>");
+				actionbar_state.setImageResource(R.drawable.ic_ab_scan_disconnected);
+			}
+		}
+	};
+
+	@SuppressWarnings("deprecation")
+	@Override
+	protected void onDestroy() {
+		unregisterReceiver();
+		super.onDestroy();
+	}
+
+	@Override
+	public void onBackPressed() {
+		this.getParent().onBackPressed();
+	}
+
+}

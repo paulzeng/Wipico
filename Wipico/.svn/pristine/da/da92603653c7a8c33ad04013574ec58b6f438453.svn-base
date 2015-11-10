@@ -1,0 +1,16 @@
+package com.chinasvc.wipico.type;
+
+public class Resolution {
+	
+	/** 屏幕类型 */
+	public static final String RESOLUTION_TYPE = "resolution_type";
+	
+	public static final int RESOLUTION_1280_720_50HZ = 1;
+	public static final int RESOLUTION_1280_720_60HZ = 2;
+	public static final int RESOLUTION_1920_1080_50HZ = 3;
+	public static final int RESOLUTION_1920_1080_60HZ = 4;
+
+	/** 屏幕调整广播Action */
+	public static final String BROADCAST_ACTION_RESOLUTION = "android.intent.action.myScreenReceiver";
+
+}

@@ -1,0 +1,41 @@
+package com.chinasvc.wipico.client;
+
+import java.util.List;
+
+import com.chinasvc.wipico.bean.Device;
+
+public interface ScanListener {
+
+	/**
+	 * 无可用信号
+	 * */
+	public void isNetworkAvailable(boolean isAvailable);
+
+	public void deviceStatus(int status);
+
+	public void deviceType(int status);
+
+	/**
+	 * 扫描设备异常，非主线程中操作
+	 * */
+	public void scanException();
+
+	/**
+	 * 扫描结果返回，在非主线程中操作
+	 * 
+	 * @param listDevices
+	 *                扫描结果列表
+	 * */
+	public void onResult(List<Device> listDevices);
+
+	public void onWifiResult(List<Device> listDevices);
+
+	public void connected();
+
+	public void connecting();
+
+	public void disconnected();
+
+	public void disconnecting();
+
+}

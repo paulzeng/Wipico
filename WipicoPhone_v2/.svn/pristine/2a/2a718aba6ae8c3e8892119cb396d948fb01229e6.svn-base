@@ -1,0 +1,57 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <ListView
+        android:id="@+id/mListView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:cacheColorHint="@android:color/transparent"
+        android:divider="@drawable/list_divider_line_horizontal"
+        android:dividerHeight="0.1dp"
+        android:drawSelectorOnTop="false"
+        android:listSelector="@drawable/list_item_selector" />
+
+    <com.chinasvc.wipicophone.widget.SideBar
+        android:id="@+id/sideBar"
+        android:layout_width="25dp"
+        android:layout_height="fill_parent"
+        android:layout_alignParentRight="true" />
+
+    <TextView
+        android:id="@+id/sideBarDialog"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/audio_index_bg"
+        android:gravity="center"
+        android:textColor="#ff666666"
+        android:typeface="sans" />
+
+    <LinearLayout
+        android:id="@+id/musicEmptyView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone" >
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_no_file" />
+
+        <TextView
+            android:id="@+id/musicEmptyValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="@string/msg_no_music"
+            android:textColor="#ff888888"
+            android:typeface="sans"
+            android:visibility="visible" />
+    </LinearLayout>
+
+</RelativeLayout>

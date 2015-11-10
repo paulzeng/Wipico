@@ -1,0 +1,45 @@
+package com.chinasvc.wipicophone;
+
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+
+public class WelcomeActivity extends Activity {
+
+	@SuppressLint("HandlerLeak")
+	Handler mHandler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case 0:
+				Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
+				startActivity(intent);
+				finish();
+				break;
+			}
+		}
+	};
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_welcome);
+		mHandler.sendEmptyMessageDelayed(0, 1500);
+	}
+
+	@Override
+	public void onBackPressed() {
+		mHandler.removeMessages(0);
+		super.onBackPressed();
+	}
+
+	@Override
+	protected void onDestroy() {
+		mHandler.removeMessages(0);
+		super.onDestroy();
+	}
+
+}

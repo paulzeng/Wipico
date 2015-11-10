@@ -1,0 +1,22 @@
+package com.chinasvc.wipico.type;
+
+/**
+ * 遥控
+ * 
+ * @since 1.0.0
+ * */
+public class Control {
+
+	public static int CONTROL_KEY = 0x8888;
+	public static int CONTROL_MOUSE = 0x8889;
+	public static int CONTROL_TOUCH = 0x888A;
+	public static int ANDKEY_DOWN = 0x4888;
+
+	public static int TOUCH_MOVE = 0x488E;
+	public static int TOUCH_DOWN = 0x488F;
+	public static int TOUCH_UP = 0x4890;
+	public static int TOUCH_POINTUP = 0x4891;
+
+	public static int EVENT_SENSOR0 = 0x8886;
+	public static int EVENT_SENSOR1 = 0x8887;
+}
